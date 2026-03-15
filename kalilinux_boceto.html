@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VulnScan Lab — Detección de Vulnerabilidades con Kali Linux</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+  /* ── Reset & Base ─────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg:       #0d1117;
+    --bg2:      #161b22;
+    --bg3:      #21262d;
+    --border:   #30363d;
+    --border2:  #21262d;
+    --text:     #e6edf3;
+    --muted:    #8b949e;
+    --accent:   #388bfd;
+    --accent2:  #58a6ff;
+    --green:    #3fb950;
+    --orange:   #d29922;
+    --red:      #f85149;
+    --purple:   #bc8cff;
+    --teal:     #39d353;
+    --nav-h:    64px;
+    --mono:     'JetBrains Mono', monospace;
+    --sans:     'Space Grotesk', sans-serif;
+  }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+  a { color: var(--accent2); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* ── Grid noise texture via pseudo ───────── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      radial-gradient(circle at 15% 50%, rgba(56,139,253,.07) 0%, transparent 50%),
+      radial-gradient(circle at 85% 20%, rgba(63,185,80,.06) 0%, transparent 40%);
+    pointer-events: none; z-index: 0;
+  }
+
+  /* ── Navbar ──────────────────────────────── */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    height: var(--nav-h);
+    background: rgba(13,17,23,.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center;
+    padding: 0 2rem; gap: 2rem;
+  }
+  .nav-logo {
+    display: flex; align-items: center; gap: .6rem;
+    font-size: 1.05rem; font-weight: 700; color: var(--text);
+    letter-spacing: -.3px;
+  }
+  .nav-logo .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--green); box-shadow: 0 0 8px var(--green);
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.6;transform:scale(.85)} }
+  .nav-links {
+    display: flex; gap: .25rem; list-style: none; margin-left: auto;
+  }
+  .nav-links a {
+    color: var(--muted); font-size: .875rem; font-weight: 500;
+    padding: .4rem .75rem; border-radius: 6px;
+    transition: color .15s, background .15s;
+  }
+  .nav-links a:hover { color: var(--text); background: var(--bg3); text-decoration: none; }
+  .nav-links a.active { color: var(--accent2); }
+  .badge-new {
+    font-size: .65rem; font-family: var(--mono);
+    background: rgba(56,139,253,.15); color: var(--accent2);
+    border: 1px solid rgba(56,139,253,.3);
+    padding: .1rem .35rem; border-radius: 4px; margin-left: .3rem;
+  }
+  .nav-cta {
+    margin-left: 1rem;
+    background: var(--accent); color: #fff;
+    font-size: .8rem; font-weight: 600;
+    padding: .4rem .9rem; border-radius: 6px;
+    transition: opacity .15s;
+  }
+  .nav-cta:hover { opacity: .85; text-decoration: none; }
+
+  /* ── Hero ─────────────────────────────────── */
+  .hero {
+    position: relative; z-index: 1;
+    max-width: 900px; margin: 0 auto;
+    padding: 7rem 2rem 5rem;
+    text-align: center;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: .5rem;
+    background: rgba(63,185,80,.1); border: 1px solid rgba(63,185,80,.25);
+    color: var(--green); font-size: .8rem; font-family: var(--mono);
+    padding: .3rem .8rem; border-radius: 999px; margin-bottom: 2rem;
+  }
+  .hero h1 {
+    font-size: clamp(2.2rem, 5vw, 3.6rem);
+    font-weight: 700; letter-spacing: -.8px;
+    line-height: 1.15; margin-bottom: 1.5rem;
+  }
+  .hero h1 span { color: var(--accent2); }
+  .hero p {
+    font-size: 1.1rem; color: var(--muted); max-width: 600px;
+    margin: 0 auto 2.5rem; line-height: 1.8;
+  }
+  .hero-btns { display: flex; gap: .75rem; justify-content: center; flex-wrap: wrap; }
+  .btn-primary {
+    background: var(--accent); color: #fff;
+    font-weight: 600; font-size: .9rem;
+    padding: .65rem 1.4rem; border-radius: 8px;
+    border: none; cursor: pointer; transition: opacity .15s;
+    display: inline-flex; align-items: center; gap: .4rem;
+  }
+  .btn-primary:hover { opacity: .85; text-decoration: none; }
+  .btn-ghost {
+    background: transparent; color: var(--text);
+    font-weight: 500; font-size: .9rem;
+    padding: .65rem 1.4rem; border-radius: 8px;
+    border: 1px solid var(--border); cursor: pointer;
+    transition: background .15s, border-color .15s;
+    display: inline-flex; align-items: center; gap: .4rem;
+  }
+  .btn-ghost:hover { background: var(--bg3); border-color: var(--muted); text-decoration: none; }
+
+  /* ── Terminal demo ───────────────────────── */
+  .terminal {
+    position: relative; z-index: 1;
+    max-width: 720px; margin: 0 auto 4rem;
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 12px; overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,.5);
+  }
+  .terminal-bar {
+    background: var(--bg3); padding: .7rem 1rem;
+    display: flex; align-items: center; gap: .5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .terminal-dot { width: 12px; height: 12px; border-radius: 50%; }
+  .terminal-dot.r { background: #ff5f57; }
+  .terminal-dot.y { background: #febc2e; }
+  .terminal-dot.g { background: #28c840; }
+  .terminal-title {
+    margin-left: auto; margin-right: auto;
+    font-size: .75rem; font-family: var(--mono); color: var(--muted);
+  }
+  .terminal-body { padding: 1.25rem 1.5rem; font-family: var(--mono); font-size: .82rem; line-height: 1.9; }
+  .t-prompt { color: var(--green); }
+  .t-cmd { color: var(--text); }
+  .t-flag { color: var(--orange); }
+  .t-output { color: var(--muted); }
+  .t-highlight { color: var(--accent2); }
+  .t-red { color: var(--red); }
+  .t-green { color: var(--green); }
+  .cursor { display: inline-block; width: 8px; height: 14px; background: var(--green); vertical-align: middle; animation: blink 1s step-end infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+  /* ── Stats ────────────────────────────────── */
+  .stats {
+    position: relative; z-index: 1;
+    display: flex; justify-content: center; flex-wrap: wrap;
+    gap: 1px; max-width: 800px; margin: 0 auto 5rem;
+    background: var(--border); border-radius: 12px; overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .stat {
+    flex: 1; min-width: 160px;
+    background: var(--bg2); padding: 1.5rem 1rem; text-align: center;
+  }
+  .stat-num { font-size: 1.8rem; font-weight: 700; color: var(--text); line-height: 1; }
+  .stat-label { font-size: .8rem; color: var(--muted); margin-top: .35rem; }
+
+  /* ── Sections ────────────────────────────── */
+  section { position: relative; z-index: 1; }
+  .section-header {
+    text-align: center; max-width: 600px; margin: 0 auto 3rem;
+  }
+  .section-tag {
+    display: inline-block;
+    font-size: .75rem; font-family: var(--mono); font-weight: 500;
+    color: var(--accent2); letter-spacing: .8px;
+    margin-bottom: .75rem; text-transform: uppercase;
+  }
+  .section-header h2 {
+    font-size: clamp(1.6rem, 3vw, 2.2rem);
+    font-weight: 700; letter-spacing: -.4px; margin-bottom: .75rem;
+  }
+  .section-header p { color: var(--muted); font-size: .95rem; }
+
+  /* ── Tools grid ──────────────────────────── */
+  .tools-section { padding: 5rem 2rem; }
+  .tools-filters {
+    display: flex; justify-content: center; flex-wrap: wrap;
+    gap: .5rem; margin-bottom: 2.5rem;
+  }
+  .filter-btn {
+    background: transparent; color: var(--muted);
+    font-size: .8rem; font-family: var(--sans); font-weight: 500;
+    padding: .35rem .85rem; border-radius: 999px;
+    border: 1px solid var(--border); cursor: pointer;
+    transition: all .15s;
+  }
+  .filter-btn:hover, .filter-btn.active {
+    background: var(--accent); color: #fff; border-color: var(--accent);
+  }
+  .tools-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1px; max-width: 1100px; margin: 0 auto;
+    background: var(--border); border-radius: 16px; overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .tool-card {
+    background: var(--bg2); padding: 1.5rem;
+    cursor: pointer; transition: background .15s;
+    display: flex; flex-direction: column; gap: .75rem;
+  }
+  .tool-card:hover { background: var(--bg3); }
+  .tool-card-head {
+    display: flex; align-items: flex-start; justify-content: space-between;
+  }
+  .tool-icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+  }
+  .tool-category-badge {
+    font-size: .7rem; font-family: var(--mono);
+    padding: .2rem .5rem; border-radius: 4px; font-weight: 500;
+  }
+  .tool-card h3 { font-size: 1rem; font-weight: 600; }
+  .tool-card p { font-size: .82rem; color: var(--muted); line-height: 1.6; flex: 1; }
+  .tool-cmd {
+    font-family: var(--mono); font-size: .75rem;
+    background: var(--bg); border: 1px solid var(--border);
+    color: var(--green); padding: .3rem .65rem; border-radius: 6px;
+    display: inline-block;
+  }
+
+  /* category colors */
+  .cat-recon   { background: rgba(56,139,253,.12); color: var(--accent2); }
+  .cat-traffic { background: rgba(63,185,80,.12);  color: var(--green); }
+  .cat-web     { background: rgba(188,140,255,.12);color: var(--purple); }
+  .cat-vuln    { background: rgba(210,153,34,.12); color: var(--orange); }
+  .cat-exploit { background: rgba(248,81,73,.12);  color: var(--red); }
+  .cat-wifi    { background: rgba(57,211,83,.12);  color: var(--teal); }
+  .icon-recon   { background: rgba(56,139,253,.1);  color: var(--accent2); }
+  .icon-traffic { background: rgba(63,185,80,.1);   color: var(--green); }
+  .icon-web     { background: rgba(188,140,255,.1); color: var(--purple); }
+  .icon-vuln    { background: rgba(210,153,34,.1);  color: var(--orange); }
+  .icon-exploit { background: rgba(248,81,73,.1);   color: var(--red); }
+  .icon-wifi    { background: rgba(57,211,83,.1);   color: var(--teal); }
+
+  /* ── How it works ────────────────────────── */
+  .how-section { padding: 5rem 2rem; border-top: 1px solid var(--border2); }
+  .steps {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem; max-width: 900px; margin: 0 auto;
+  }
+  .step {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 12px; padding: 1.5rem;
+    position: relative; overflow: hidden;
+  }
+  .step::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--green));
+  }
+  .step-num {
+    font-size: 2rem; font-weight: 700; font-family: var(--mono);
+    color: var(--border); line-height: 1; margin-bottom: .75rem;
+  }
+  .step h3 { font-size: .95rem; font-weight: 600; margin-bottom: .5rem; }
+  .step p  { font-size: .82rem; color: var(--muted); line-height: 1.6; }
+
+  /* ── Glossary preview ─────────────────────── */
+  .glossary-section { padding: 5rem 2rem; border-top: 1px solid var(--border2); }
+  .glossary-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem; max-width: 900px; margin: 0 auto;
+  }
+  .glossary-item {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 10px; padding: 1rem 1.2rem;
+  }
+  .glossary-term {
+    font-family: var(--mono); font-size: .85rem; font-weight: 500;
+    color: var(--accent2); margin-bottom: .3rem;
+  }
+  .glossary-def { font-size: .82rem; color: var(--muted); line-height: 1.6; }
+
+  /* ── Ethics section ──────────────────────── */
+  .ethics-section { padding: 5rem 2rem; border-top: 1px solid var(--border2); }
+  .ethics-card {
+    max-width: 750px; margin: 0 auto;
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 16px; padding: 2.5rem;
+    display: grid; grid-template-columns: auto 1fr; gap: 2rem;
+    align-items: start;
+  }
+  .ethics-icon {
+    width: 52px; height: 52px; border-radius: 14px;
+    background: rgba(248,81,73,.1); color: var(--red);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem; flex-shrink: 0;
+  }
+  .ethics-card h3 { font-size: 1.15rem; font-weight: 600; margin-bottom: .75rem; }
+  .ethics-card p  { font-size: .88rem; color: var(--muted); line-height: 1.8; }
+  .ethics-pills { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1.25rem; }
+  .pill {
+    font-size: .75rem; font-family: var(--mono);
+    padding: .25rem .6rem; border-radius: 5px;
+    background: rgba(63,185,80,.1); color: var(--green);
+    border: 1px solid rgba(63,185,80,.2);
+  }
+
+  /* ── Newsletter / CTA banner ─────────────── */
+  .cta-section {
+    padding: 5rem 2rem; border-top: 1px solid var(--border2);
+    text-align: center;
+  }
+  .cta-box {
+    max-width: 600px; margin: 0 auto;
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 20px; padding: 3rem 2rem;
+    position: relative; overflow: hidden;
+  }
+  .cta-box::before {
+    content: '';
+    position: absolute; top: -60px; left: 50%; transform: translateX(-50%);
+    width: 300px; height: 300px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(56,139,253,.08), transparent 70%);
+    pointer-events: none;
+  }
+  .cta-box h2 { font-size: 1.6rem; font-weight: 700; margin-bottom: .75rem; }
+  .cta-box p { color: var(--muted); font-size: .9rem; margin-bottom: 1.5rem; }
+
+  /* ── Footer ──────────────────────────────── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 2.5rem 2rem;
+    display: flex; flex-wrap: wrap;
+    justify-content: space-between; align-items: center;
+    gap: 1rem; font-size: .8rem; color: var(--muted);
+  }
+  .footer-logo { font-weight: 700; color: var(--text); }
+  .footer-links { display: flex; gap: 1.25rem; }
+  .footer-links a { color: var(--muted); }
+  .footer-links a:hover { color: var(--text); text-decoration: none; }
+
+  /* ── Misc ─────────────────────────────────── */
+  .container { max-width: 1100px; margin: 0 auto; }
+  .divider { border: none; border-top: 1px solid var(--border2); margin: 0; }
+
+  /* ── Skeleton overlay for boceto effect ───── */
+  .wip-banner {
+    position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 200;
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 10px; padding: .75rem 1.1rem;
+    font-size: .78rem; font-family: var(--mono);
+    color: var(--orange); display: flex; align-items: center; gap: .5rem;
+    box-shadow: 0 8px 24px rgba(0,0,0,.4);
+  }
+  .wip-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--orange); animation: pulse 1.5s ease-in-out infinite; }
+
+  /* ── Responsive ──────────────────────────── */
+  @media (max-width: 640px) {
+    .nav-links { display: none; }
+    .ethics-card { grid-template-columns: 1fr; }
+    .terminal-body { font-size: .72rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── NAVBAR ─────────────────────────────────────────────── -->
+<nav>
+  <div class="nav-logo">
+    <div class="dot"></div>
+    VulnScan<span style="color:var(--accent2)">Lab</span>
+  </div>
+  <ul class="nav-links">
+    <li><a href="#inicio" class="active">Inicio</a></li>
+    <li><a href="#herramientas">Herramientas</a></li>
+    <li><a href="#como-funciona">¿Cómo funciona?</a></li>
+    <li><a href="#glosario">Glosario</a></li>
+    <li><a href="#etica">Ética <span class="badge-new">!</span></a></li>
+  </ul>
+  <a href="#herramientas" class="nav-cta">Explorar herramientas →</a>
+</nav>
+
+<!-- ── HERO ───────────────────────────────────────────────── -->
+<div id="inicio" class="hero">
+  <div class="hero-badge">
+    <i class="fa-solid fa-shield-halved" style="font-size:.8rem"></i>
+    Recurso educativo · Uso ético · Código abierto
+  </div>
+  <h1>Detecta vulnerabilidades<br>en redes locales con<br><span>Kali Linux</span></h1>
+  <p>Aprende a usar las herramientas de ciberseguridad más importantes del sector: qué hacen, cómo funcionan y cuándo usarlas — todo en español, desde cero.</p>
+  <div class="hero-btns">
+    <a href="#herramientas" class="btn-primary"><i class="fa-solid fa-terminal"></i> Ver herramientas</a>
+    <a href="#como-funciona" class="btn-ghost"><i class="fa-regular fa-circle-question"></i> ¿Cómo usar esta guía?</a>
+  </div>
+</div>
+
+<!-- ── TERMINAL DEMO ───────────────────────────────────────── -->
+<div class="terminal" style="max-width:680px;margin:0 auto 3.5rem;padding:0 2rem;" >
+<div style="max-width:680px;margin:0 auto;">
+<div class="terminal">
+  <div class="terminal-bar">
+    <div class="terminal-dot r"></div>
+    <div class="terminal-dot y"></div>
+    <div class="terminal-dot g"></div>
+    <span class="terminal-title">kali@vulnscanlab ~ — nmap demo</span>
+  </div>
+  <div class="terminal-body">
+    <div><span class="t-prompt">┌──(kali㉿vulnscanlab)-[~]</span></div>
+    <div><span class="t-prompt">└─$</span> <span class="t-cmd">nmap</span> <span class="t-flag">-sV -O -p 1-1000</span> <span class="t-highlight">192.168.1.0/24</span></div>
+    <div style="margin-top:.5rem"><span class="t-output">Starting Nmap 7.94 ( https://nmap.org )</span></div>
+    <div><span class="t-output">Nmap scan report for </span><span class="t-highlight">192.168.1.1</span></div>
+    <div><span class="t-output">Host is up (0.0023s latency).</span></div>
+    <div style="margin-top:.3rem"><span class="t-output">PORT     STATE  SERVICE    VERSION</span></div>
+    <div><span class="t-green">22/tcp</span>   <span class="t-output">open   ssh        OpenSSH 8.9p1</span></div>
+    <div><span class="t-green">80/tcp</span>   <span class="t-output">open   http       Apache 2.4.52</span></div>
+    <div><span class="t-red">443/tcp</span>  <span class="t-output">open   ssl/https  nginx 1.18</span></div>
+    <div><span class="t-output">OS: </span><span class="t-highlight">Linux 5.x (Ubuntu 22.04)</span></div>
+    <div style="margin-top:.5rem"><span class="t-output">Nmap done: 1 IP address scanned in 8.24s</span></div>
+    <div style="margin-top:.3rem"><span class="t-prompt">└─$</span> <span class="cursor"></span></div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- ── STATS ──────────────────────────────────────────────── -->
+<div class="stats" style="max-width:800px;margin:0 auto 5rem;padding:0 2rem;">
+<div style="max-width:800px;margin:0 auto;">
+<div class="stats">
+  <div class="stat"><div class="stat-num">12</div><div class="stat-label">Herramientas documentadas</div></div>
+  <div class="stat"><div class="stat-num">5</div><div class="stat-label">Categorías de análisis</div></div>
+  <div class="stat"><div class="stat-num">100%</div><div class="stat-label">Contenido en español</div></div>
+  <div class="stat"><div class="stat-num">Ético</div><div class="stat-label">Uso responsable y legal</div></div>
+</div>
+</div>
+</div>
+
+<!-- ── TOOLS GRID ─────────────────────────────────────────── -->
+<section id="herramientas" class="tools-section">
+  <div class="section-header">
+    <span class="section-tag">// herramientas</span>
+    <h2>Principales herramientas de Kali Linux</h2>
+    <p>Selecciona una herramienta para explorar su documentación, comandos y ejemplos de uso en redes locales.</p>
+  </div>
+
+  <div class="tools-filters">
+    <button class="filter-btn active" onclick="filterTools('todas', this)">Todas</button>
+    <button class="filter-btn" onclick="filterTools('reconocimiento', this)">Reconocimiento</button>
+    <button class="filter-btn" onclick="filterTools('trafico', this)">Tráfico de red</button>
+    <button class="filter-btn" onclick="filterTools('web', this)">Seguridad web</button>
+    <button class="filter-btn" onclick="filterTools('vulnerabilidades', this)">Vulnerabilidades</button>
+    <button class="filter-btn" onclick="filterTools('explotacion', this)">Explotación</button>
+    <button class="filter-btn" onclick="filterTools('wifi', this)">Wi-Fi</button>
+  </div>
+
+  <div class="tools-grid" id="toolsGrid">
+
+    <!-- Nmap -->
+    <div class="tool-card" data-cat="reconocimiento" onclick="showTool('nmap')">
+      <div class="tool-card-head">
+        <div class="tool-icon icon-recon"><i class="fa-solid fa-radar"></i></div>
+        <span class="tool-category-badge cat-recon">Reconocimiento</span>
+      </div>
+      <h3>Nmap</h3>
+      <p>Escáner de red y puertos. Identifica hosts activos, servicios en ejecución y sistemas operativos dentro de una red local.</p>
+      <span class="tool-cmd">nmap -sV 192.168.1.0/24</span>
+    </div>
+
+    <!-- Netdiscover -->
+    <div class="tool-card" data-cat="reconocimiento" onclick="showTool('netdiscover')">
+      <div class="tool-card-head">
+        <div class="tool-icon icon-recon"><i class="fa-solid fa-network-wired"></i></div>
+        <span class="tool-category-badge cat-recon">Reconocimiento</span>
+      </div>
+      <h3>Netdiscover</h3>
+      <p>Descubre dispositivos activos en la red local utilizando peticiones ARP activas y pasivas.</p>
+      <span class="tool-cmd">netdiscover -r 192.168.1.0/24</span>
+    </div>
+
+    <!-- Wireshark -->
+    <div class="tool-card" data-cat="trafico" onclick="showTool('wireshark')">
+      <div class="tool-card-head">
+        <div class="tool-icon icon-traffic"><i class="fa-solid fa-wave-square"></i></div>
+        <span class="tool-category-badge cat-traffic">Tráfico de red</span>
+      </div>
+      <h3>Wireshark</h3>
+      <p>Captura y analiza paquetes de red en tiempo real. Permite inspeccionar protocolos, conexiones y datos transmitidos.</p>
+      <span class="tool-cmd">wireshark -i eth0</span>
+    </div>
+
+    <!-- Tcpdump -->
+    <div class="tool-card" data-cat="trafico" onclick="showTool('tcpdump')">
+      <div class="tool-card-head">
+        <div class="tool-icon icon-traffic"><i class="fa-solid fa-terminal"></i></div>
+        <span class="tool-category-badge cat-traffic">Tráfico de red</span>
+      </div>
+      <h3>Tcpdump</h3>
+      <p>Captura de tráfico de red desde la línea de comandos. Ideal para filtrar y guardar paquetes de forma automatizada.</p>
+      <span class="tool-cmd">tcpdump -i eth0 port 80</span>
+    </div>
+
+    <!-- Nikto -->
+    <div class="tool-card" data-cat="web" onclick="showTool('nikto')">
+      <div class="tool-card-head">
+        <div class="tool-icon icon-web"><i class="fa-solid fa-spider"></i></div>
+        <span class="tool-category-badge cat-web">Seguridad web</span>
+      </div>
+      <h3>Nikto</h3>
+      <p>Escáner de servidores web que detecta configuraciones inseguras, software desactualizado y rutas peligrosas.</p>
+      <span class="tool-cmd">nikto -h 192.168.1.10</span>
+    </div>
+
+    <!-- Burp Suite -->
+    <div class="tool-card" data-cat="web" onclick="showTool('burpsuite')">
+      <div class="tool-card-head">
+        <div class="tool-icon icon-web"><i class="fa-solid fa-bug"></i></div>
+        <span class="tool-category-badge cat-web">Seguridad web</span>
+      </div>
+      <h3>Burp Suite</h3>
+      <p>Proxy de interceptación para analizar y manipular peticiones HTTP/HTTPS. Herramienta clave en auditorías web.</p>
+      <span class="tool-cmd">burpsuite &amp;</span>
+    </div>
+
+    <!-- OpenVAS -->
+    <div class="tool-card" data-cat="vulnerabilidades" onclick="showTool('openvas')">
+      <div class="tool-card-head">
+        <div class="tool-icon icon-vuln"><i class="fa-solid fa-shield-virus"></i></div>
+        <span class="tool-category-badge cat-vuln">Vulnerabilidades</span>
+      </div>
+      <h3>OpenVAS / GVM</h3>
+      <p>Sistema integral de gestión y evaluación de vulnerabilidades con base de datos de CVEs actualizada automáticamente.</p>
+      <span class="tool-cmd">gvm-start</span>
+    </div>
+
+    <!-- Metasploit -->
+    <div class="tool-card" data-cat="explotacion" onclick="showTool('metasploit')">
+      <div class="tool-card-head">
+        <div class="tool-icon icon-exploit"><i class="fa-solid fa-bomb"></i></div>
+        <span class="tool-category-badge cat-exploit">Explotación</span>
+      </div>
+      <h3>Metasploit</h3>
+      <p>Framework de explotación de vulnerabilidades conocidas. Organizado en módulos: exploits, payloads y auxiliares.</p>
+      <span class="tool-cmd">msfconsole</span>
+    </div>
+
+    <!-- Sqlmap -->
+    <div class="tool-card" data-cat="web explotacion" onclick="showTool('sqlmap')">
+      <div class="tool-card-head">
+        <div class="tool-icon icon-exploit"><i class="fa-solid fa-database"></i></div>
+        <span class="tool-category-badge cat-exploit">Explotación</span>
+      </div>
+      <h3>Sqlmap</h3>
+      <p>Detección y explotación automática de inyecciones SQL en aplicaciones web. Soporta múltiples bases de datos.</p>
+      <span class="tool-cmd">sqlmap -u "http://target/id=1"</span>
+    </div>
+
+    <!-- Hydra -->
+    <div class="tool-card" data-cat="explotacion" onclick="showTool('hydra')">
+      <div class="tool-card-head">
+        <div class="tool-icon icon-exploit"><i class="fa-solid fa-key"></i></div>
+        <span class="tool-category-badge cat-exploit">Explotación</span>
+      </div>
+      <h3>Hydra</h3>
+      <p>Herramienta de fuerza bruta para servicios de red: SSH, FTP, HTTP, SMB. Evalúa la robustez de contraseñas.</p>
+      <span class="tool-cmd">hydra -l admin -P wordlist.txt ssh://192.168.1.1</span>
+    </div>
+
+    <!-- Aircrack-ng -->
+    <div class="tool-card" data-cat="wifi" onclick="showTool('aircrack')">
+      <div class="tool-card-head">
+        <div class="tool-icon icon-wifi"><i class="fa-solid fa-wifi"></i></div>
+        <span class="tool-category-badge cat-wifi">Wi-Fi</span>
+      </div>
+      <h3>Aircrack-ng</h3>
+      <p>Suite para auditoría de redes inalámbricas: captura de handshakes WPA, análisis de paquetes y evaluación de seguridad Wi-Fi.</p>
+      <span class="tool-cmd">airodump-ng wlan0mon</span>
+    </div>
+
+    <!-- Netcat -->
+    <div class="tool-card" data-cat="reconocimiento explotacion" onclick="showTool('netcat')">
+      <div class="tool-card-head">
+        <div class="tool-icon icon-recon"><i class="fa-solid fa-plug"></i></div>
+        <span class="tool-category-badge cat-recon">Redes</span>
+      </div>
+      <h3>Netcat</h3>
+      <p>La "navaja suiza" de las redes. Transferencia de datos, diagnóstico de puertos y conexiones TCP/UDP desde terminal.</p>
+      <span class="tool-cmd">nc -lvnp 4444</span>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── MODAL ──────────────────────────────────────────────── -->
+<div id="modal" style="display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:1rem">
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:16px;width:100%;max-width:680px;max-height:85vh;overflow-y:auto;">
+    <div style="padding:1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+      <h3 id="modal-title" style="font-size:1.1rem;font-weight:600;"></h3>
+      <button onclick="closeModal()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.2rem;">×</button>
+    </div>
+    <div id="modal-body" style="padding:1.5rem;"></div>
+  </div>
+</div>
+
+<!-- ── HOW IT WORKS ────────────────────────────────────────── -->
+<section id="como-funciona" class="how-section">
+  <div class="section-header">
+    <span class="section-tag">// metodología</span>
+    <h2>¿Cómo se realiza una auditoría de red?</h2>
+    <p>El proceso de detección de vulnerabilidades sigue fases definidas. Cada herramienta cumple un rol específico.</p>
+  </div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">01</div>
+      <h3>Reconocimiento</h3>
+      <p>Identificar qué dispositivos, puertos y servicios están activos en la red. Herramientas: <span style="color:var(--accent2)">Nmap</span>, <span style="color:var(--accent2)">Netdiscover</span>.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">02</div>
+      <h3>Captura de tráfico</h3>
+      <p>Analizar los datos que circulan por la red para detectar comunicaciones inseguras. Herramientas: <span style="color:var(--green)">Wireshark</span>, <span style="color:var(--green)">Tcpdump</span>.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">03</div>
+      <h3>Análisis de vulnerabilidades</h3>
+      <p>Identificar debilidades en servicios y aplicaciones web. Herramientas: <span style="color:var(--purple)">Nikto</span>, <span style="color:var(--orange)">OpenVAS</span>.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">04</div>
+      <h3>Reporte de hallazgos</h3>
+      <p>Documentar cada vulnerabilidad encontrada con su nivel de riesgo y recomendaciones de mitigación.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── GLOSSARY ────────────────────────────────────────────── -->
+<section id="glosario" class="glossary-section">
+  <div class="section-header">
+    <span class="section-tag">// glosario</span>
+    <h2>Términos clave</h2>
+    <p>Conceptos esenciales para entender la seguridad en redes locales.</p>
+  </div>
+  <div class="glossary-grid">
+    <div class="glossary-item">
+      <div class="glossary-term">CVE</div>
+      <div class="glossary-def">Common Vulnerabilities and Exposures. Identificador único para vulnerabilidades de seguridad públicamente conocidas.</div>
+    </div>
+    <div class="glossary-item">
+      <div class="glossary-term">Puerto (Port)</div>
+      <div class="glossary-def">Número lógico (0-65535) que identifica un servicio de red en un dispositivo. Ej: puerto 80 = HTTP.</div>
+    </div>
+    <div class="glossary-item">
+      <div class="glossary-term">Penetration Testing</div>
+      <div class="glossary-def">Prueba de penetración autorizada: simulación de ataques para identificar vulnerabilidades antes que los atacantes.</div>
+    </div>
+    <div class="glossary-item">
+      <div class="glossary-term">Payload</div>
+      <div class="glossary-def">Código que se ejecuta en el sistema objetivo durante una explotación. Puede ser una shell reversa, un agente, etc.</div>
+    </div>
+    <div class="glossary-item">
+      <div class="glossary-term">Sniffing</div>
+      <div class="glossary-def">Captura y análisis del tráfico de red para inspeccionar los datos que viajan entre dispositivos.</div>
+    </div>
+    <div class="glossary-item">
+      <div class="glossary-term">ARP</div>
+      <div class="glossary-def">Address Resolution Protocol. Protocolo que asocia direcciones IP con direcciones MAC en una red local.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ETHICS ─────────────────────────────────────────────── -->
+<section id="etica" class="ethics-section">
+  <div class="section-header">
+    <span class="section-tag">// ética y legalidad</span>
+    <h2>Uso responsable del conocimiento</h2>
+    <p>La ciberseguridad ética tiene reglas claras que todo profesional debe conocer.</p>
+  </div>
+  <div class="ethics-card">
+    <div class="ethics-icon"><i class="fa-solid fa-scale-balanced"></i></div>
+    <div>
+      <h3>¿Qué es el Hacking Ético?</h3>
+      <p>El hacking ético consiste en utilizar las mismas técnicas y herramientas que un atacante malicioso, pero con <strong>autorización expresa</strong> del propietario del sistema y con el objetivo de mejorar su seguridad. En Colombia, la <strong>Ley 1273 de 2009</strong> tipifica como delito el acceso no autorizado a sistemas informáticos. Usar estas herramientas sin permiso puede tener consecuencias legales graves.</p>
+      <div class="ethics-pills">
+        <span class="pill">✓ Solo en redes propias</span>
+        <span class="pill">✓ Con autorización escrita</span>
+        <span class="pill">✓ Fines educativos</span>
+        <span class="pill">✓ Ley 1273/2009</span>
+        <span class="pill">✓ Hacking ético</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA ────────────────────────────────────────────────── -->
+<section class="cta-section">
+  <div class="cta-box">
+    <h2>¿Listo para aprender?</h2>
+    <p>Explora cada herramienta en detalle: cómo funciona, sus comandos principales y ejemplos reales de uso en redes locales.</p>
+    <a href="#herramientas" class="btn-primary" style="font-size:.9rem;padding:.7rem 1.6rem;display:inline-flex;">
+      <i class="fa-solid fa-terminal"></i> Ver todas las herramientas
+    </a>
+  </div>
+</section>
+
+<!-- ── FOOTER ─────────────────────────────────────────────── -->
+<footer>
+  <span class="footer-logo">VulnScan<span style="color:var(--accent2)">Lab</span></span>
+  <div class="footer-links">
+    <a href="#herramientas">Herramientas</a>
+    <a href="#glosario">Glosario</a>
+    <a href="#etica">Ética</a>
+    <a href="#como-funciona">Metodología</a>
+  </div>
+  <span>Proyecto educativo · Uso ético · 2026</span>
+</footer>
+
+<!-- ── WIP BADGE ─────────────────────────────────────────── -->
+<div class="wip-banner">
+  <div class="wip-dot"></div>
+  Primer avance · En desarrollo
+</div>
+
+<!-- ── SCRIPTS ────────────────────────────────────────────── -->
+<script>
+const toolData = {
+  nmap: {
+    title: 'Nmap — Network Mapper',
+    body: `
+      <p style="color:var(--muted);font-size:.88rem;line-height:1.8;margin-bottom:1.25rem">
+        <strong style="color:var(--text)">Nmap</strong> (Network Mapper) es el escáner de redes más utilizado en el mundo de la ciberseguridad. Permite descubrir qué dispositivos están activos en una red, qué puertos tienen abiertos, qué servicios están corriendo y qué sistema operativo usa cada host.
+      </p>
+      <h4 style="font-size:.85rem;color:var(--accent2);font-family:var(--mono);margin-bottom:.75rem">// Comandos básicos</h4>
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:1rem;font-family:var(--mono);font-size:.78rem;line-height:2">
+        <div><span style="color:var(--green)">nmap 192.168.1.0/24</span>  <span style="color:var(--muted)"># Descubrir hosts en la red</span></div>
+        <div><span style="color:var(--green)">nmap -sV 192.168.1.1</span>  <span style="color:var(--muted)"># Detectar versiones de servicios</span></div>
+        <div><span style="color:var(--green)">nmap -O 192.168.1.1</span>   <span style="color:var(--muted)"># Detectar sistema operativo</span></div>
+        <div><span style="color:var(--green)">nmap -p 1-1000 192.168.1.1</span> <span style="color:var(--muted)"># Escanear puertos 1-1000</span></div>
+      </div>
+      <div style="background:rgba(56,139,253,.08);border:1px solid rgba(56,139,253,.2);border-radius:8px;padding:.9rem 1rem;margin-top:1.25rem;font-size:.82rem;color:var(--muted)">
+        <strong style="color:var(--accent2)">ℹ Caso de uso:</strong> Un administrador de red usa Nmap para inventariar todos los dispositivos de la empresa y verificar que no haya servicios expuestos innecesariamente.
+      </div>
+    `
+  },
+  wireshark: {
+    title: 'Wireshark — Analizador de Paquetes',
+    body: `
+      <p style="color:var(--muted);font-size:.88rem;line-height:1.8;margin-bottom:1.25rem">
+        <strong style="color:var(--text)">Wireshark</strong> es un analizador de protocolos de red con interfaz gráfica. Captura todo el tráfico que pasa por una interfaz de red y lo presenta de forma organizada, permitiendo inspeccionar cada paquete a nivel de byte.
+      </p>
+      <h4 style="font-size:.85rem;color:var(--green);font-family:var(--mono);margin-bottom:.75rem">// Filtros comunes</h4>
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:1rem;font-family:var(--mono);font-size:.78rem;line-height:2">
+        <div><span style="color:var(--green)">http</span>              <span style="color:var(--muted)"># Solo tráfico HTTP</span></div>
+        <div><span style="color:var(--green)">ip.addr == 192.168.1.1</span> <span style="color:var(--muted)"># Tráfico de/hacia una IP</span></div>
+        <div><span style="color:var(--green)">tcp.port == 443</span>   <span style="color:var(--muted)"># Solo puerto HTTPS</span></div>
+        <div><span style="color:var(--green)">dns</span>               <span style="color:var(--muted)"># Consultas DNS</span></div>
+      </div>
+      <div style="background:rgba(63,185,80,.08);border:1px solid rgba(63,185,80,.2);border-radius:8px;padding:.9rem 1rem;margin-top:1.25rem;font-size:.82rem;color:var(--muted)">
+        <strong style="color:var(--green)">ℹ Caso de uso:</strong> Detectar credenciales transmitidas en texto plano (HTTP sin cifrar), identificar dispositivos que hacen peticiones inusuales o analizar la latencia de una aplicación.
+      </div>
+    `
+  },
+  metasploit: {
+    title: 'Metasploit Framework',
+    body: `
+      <p style="color:var(--muted);font-size:.88rem;line-height:1.8;margin-bottom:1.25rem">
+        <strong style="color:var(--text)">Metasploit</strong> es el framework de pruebas de penetración más completo del mundo. Organiza exploits, payloads y módulos auxiliares para demostrar el impacto real de vulnerabilidades conocidas en entornos controlados.
+      </p>
+      <h4 style="font-size:.85rem;color:var(--red);font-family:var(--mono);margin-bottom:.75rem">// Comandos esenciales</h4>
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:1rem;font-family:var(--mono);font-size:.78rem;line-height:2">
+        <div><span style="color:var(--green)">msfconsole</span>                  <span style="color:var(--muted)"># Iniciar la consola</span></div>
+        <div><span style="color:var(--green)">search eternalblue</span>           <span style="color:var(--muted)"># Buscar exploits</span></div>
+        <div><span style="color:var(--green)">use exploit/windows/smb/ms17_010</span> <span style="color:var(--muted)"># Seleccionar exploit</span></div>
+        <div><span style="color:var(--green)">set RHOSTS 192.168.1.10</span>     <span style="color:var(--muted)"># Definir objetivo</span></div>
+        <div><span style="color:var(--green)">show options</span>                 <span style="color:var(--muted)"># Ver configuración</span></div>
+      </div>
+      <div style="background:rgba(248,81,73,.08);border:1px solid rgba(248,81,73,.2);border-radius:8px;padding:.9rem 1rem;margin-top:1.25rem;font-size:.82rem;color:var(--muted)">
+        <strong style="color:var(--red)">⚠ Importante:</strong> Metasploit solo debe usarse en sistemas propios o con autorización expresa. Su uso no autorizado es ilegal según la Ley 1273 de 2009.
+      </div>
+    `
+  }
+};
+
+function showTool(name) {
+  const data = toolData[name];
+  if (!data) {
+    document.getElementById('modal-title').textContent = name.charAt(0).toUpperCase() + name.slice(1);
+    document.getElementById('modal-body').innerHTML = '<p style="color:var(--muted);font-size:.88rem">Página de esta herramienta <strong style="color:var(--accent2)">próximamente</strong> — en desarrollo para el siguiente avance del proyecto.</p>';
+  } else {
+    document.getElementById('modal-title').textContent = data.title;
+    document.getElementById('modal-body').innerHTML = data.body;
+  }
+  document.getElementById('modal').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function closeModal() {
+  document.getElementById('modal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+document.getElementById('modal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+function filterTools(cat, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.tool-card').forEach(card => {
+    const cats = card.dataset.cat || '';
+    card.style.display = (cat === 'todas' || cats.includes(cat)) ? '' : 'none';
+  });
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+</script>
+</body>
+</html>
