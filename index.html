@@ -259,12 +259,14 @@
   .cat-vuln    { background: rgba(210,153,34,.12); color: var(--orange); }
   .cat-exploit { background: rgba(248,81,73,.12);  color: var(--red); }
   .cat-wifi    { background: rgba(57,211,83,.12);  color: var(--teal); }
+  .cat-monitor { background: rgba(56,189,248,.12); color: #38bdf8; }
   .icon-recon   { background: rgba(56,139,253,.1);  color: var(--accent2); }
   .icon-traffic { background: rgba(63,185,80,.1);   color: var(--green); }
   .icon-web     { background: rgba(188,140,255,.1); color: var(--purple); }
   .icon-vuln    { background: rgba(210,153,34,.1);  color: var(--orange); }
   .icon-exploit { background: rgba(248,81,73,.1);   color: var(--red); }
   .icon-wifi    { background: rgba(57,211,83,.1);   color: var(--teal); }
+  .icon-monitor { background: rgba(56,189,248,.1);  color: #38bdf8; }
 
   /* ── How it works ────────────────────────── */
   .how-section { padding: 5rem 2rem; border-top: 1px solid var(--border2); }
@@ -450,8 +452,8 @@
 <div class="stats" style="max-width:800px;margin:0 auto 5rem;padding:0 2rem;">
 <div style="max-width:800px;margin:0 auto;">
 <div class="stats">
-  <div class="stat"><div class="stat-num">12</div><div class="stat-label">Herramientas documentadas</div></div>
-  <div class="stat"><div class="stat-num">5</div><div class="stat-label">Categorías de análisis</div></div>
+  <div class="stat"><div class="stat-num">15</div><div class="stat-label">Herramientas documentadas</div></div>
+  <div class="stat"><div class="stat-num">6</div><div class="stat-label">Categorías de análisis</div></div>
   <div class="stat"><div class="stat-num">100%</div><div class="stat-label">Contenido en español</div></div>
   <div class="stat"><div class="stat-num">Ético</div><div class="stat-label">Uso responsable y legal</div></div>
 </div>
@@ -474,6 +476,7 @@
     <button class="filter-btn" onclick="filterTools('vulnerabilidades', this)">Vulnerabilidades</button>
     <button class="filter-btn" onclick="filterTools('explotacion', this)">Explotación</button>
     <button class="filter-btn" onclick="filterTools('wifi', this)">Wi-Fi</button>
+    <button class="filter-btn" onclick="filterTools('monitoreo', this)">Monitoreo</button>
   </div>
 
   <div class="tools-grid" id="toolsGrid">
@@ -481,7 +484,7 @@
     <!-- Nmap -->
     <div class="tool-card" data-cat="reconocimiento" onclick="showTool('nmap')">
       <div class="tool-card-head">
-        <div class="tool-icon icon-recon"><i class="fa-solid fa-radar"></i></div>
+        <div class="tool-icon icon-recon"><i class="fa-solid fa-magnifying-glass"></i></div>
         <span class="tool-category-badge cat-recon">Reconocimiento</span>
       </div>
       <h3>Nmap</h3>
@@ -608,6 +611,39 @@
       <h3>Netcat</h3>
       <p>La "navaja suiza" de las redes. Transferencia de datos, diagnóstico de puertos y conexiones TCP/UDP desde terminal.</p>
       <span class="tool-cmd">nc -lvnp 4444</span>
+    </div>
+
+    <!-- Grafana -->
+    <div class="tool-card" data-cat="monitoreo" onclick="showTool('grafana')">
+      <div class="tool-card-head">
+        <div class="tool-icon icon-monitor"><i class="fa-solid fa-chart-line"></i></div>
+        <span class="tool-category-badge cat-monitor">Monitoreo</span>
+      </div>
+      <h3>Grafana</h3>
+      <p>Plataforma de visualización y análisis de métricas. Permite crear dashboards en tiempo real para monitorear el comportamiento de la red y detectar anomalías de seguridad.</p>
+      <span class="tool-cmd">grafana-server start</span>
+    </div>
+
+    <!-- Zabbix -->
+    <div class="tool-card" data-cat="monitoreo" onclick="showTool('zabbix')">
+      <div class="tool-card-head">
+        <div class="tool-icon icon-monitor"><i class="fa-solid fa-tower-broadcast"></i></div>
+        <span class="tool-category-badge cat-monitor">Monitoreo</span>
+      </div>
+      <h3>Zabbix</h3>
+      <p>Sistema de monitoreo de red empresarial de código abierto. Supervisa disponibilidad, rendimiento y seguridad de hosts, servicios y dispositivos de red en tiempo real.</p>
+      <span class="tool-cmd">zabbix_server -c /etc/zabbix/zabbix_server.conf</span>
+    </div>
+
+    <!-- Deephat -->
+    <div class="tool-card" data-cat="vulnerabilidades explotacion" onclick="showTool('deephat')">
+      <div class="tool-card-head">
+        <div class="tool-icon icon-exploit"><i class="fa-solid fa-hat-wizard"></i></div>
+        <span class="tool-category-badge cat-exploit">Explotación</span>
+      </div>
+      <h3>Deephat</h3>
+      <p>Herramienta de análisis de vulnerabilidades orientada a la identificación de vectores de ataque mediante técnicas de enumeración profunda en redes locales.</p>
+      <span class="tool-cmd">deephat --scan --target 192.168.1.0/24</span>
     </div>
 
   </div>
@@ -739,7 +775,7 @@
 <!-- ── WIP BADGE ─────────────────────────────────────────── -->
 <div class="wip-banner">
   <div class="wip-dot"></div>
-  Primer avance · En desarrollo
+  Segundo avance · En desarrollo
 </div>
 
 <!-- ── SCRIPTS ────────────────────────────────────────────── -->
@@ -748,18 +784,101 @@ const toolData = {
   nmap: {
     title: 'Nmap — Network Mapper',
     body: `
-      <p style="color:var(--muted);font-size:.88rem;line-height:1.8;margin-bottom:1.25rem">
-        <strong style="color:var(--text)">Nmap</strong> (Network Mapper) es el escáner de redes más utilizado en el mundo de la ciberseguridad. Permite descubrir qué dispositivos están activos en una red, qué puertos tienen abiertos, qué servicios están corriendo y qué sistema operativo usa cada host.
-      </p>
-      <h4 style="font-size:.85rem;color:var(--accent2);font-family:var(--mono);margin-bottom:.75rem">// Comandos básicos</h4>
-      <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:1rem;font-family:var(--mono);font-size:.78rem;line-height:2">
-        <div><span style="color:var(--green)">nmap 192.168.1.0/24</span>  <span style="color:var(--muted)"># Descubrir hosts en la red</span></div>
-        <div><span style="color:var(--green)">nmap -sV 192.168.1.1</span>  <span style="color:var(--muted)"># Detectar versiones de servicios</span></div>
-        <div><span style="color:var(--green)">nmap -O 192.168.1.1</span>   <span style="color:var(--muted)"># Detectar sistema operativo</span></div>
-        <div><span style="color:var(--green)">nmap -p 1-1000 192.168.1.1</span> <span style="color:var(--muted)"># Escanear puertos 1-1000</span></div>
+      <!-- MINI AVANCE COMPLETO: NMAP -->
+      <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1.25rem">
+        <div style="width:44px;height:44px;border-radius:12px;background:rgba(56,139,253,.12);color:#58a6ff;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0"><i class="fa-solid fa-magnifying-glass"></i></div>
+        <div>
+          <div style="font-size:.7rem;font-family:var(--mono);color:#58a6ff;margin-bottom:.2rem">RECONOCIMIENTO · KALI LINUX</div>
+          <div style="font-size:.82rem;color:var(--muted)">Gordon Lyon · Licencia NPSL · kali.org/tools/nmap</div>
+        </div>
       </div>
-      <div style="background:rgba(56,139,253,.08);border:1px solid rgba(56,139,253,.2);border-radius:8px;padding:.9rem 1rem;margin-top:1.25rem;font-size:.82rem;color:var(--muted)">
-        <strong style="color:var(--accent2)">ℹ Caso de uso:</strong> Un administrador de red usa Nmap para inventariar todos los dispositivos de la empresa y verificar que no haya servicios expuestos innecesariamente.
+
+      <h4 style="font-size:.82rem;color:var(--accent2);font-family:var(--mono);margin-bottom:.6rem">// ¿Qué es?</h4>
+      <p style="color:var(--muted);font-size:.87rem;line-height:1.85;margin-bottom:1.25rem">
+        <strong style="color:var(--text)">Nmap</strong> (Network Mapper) es el escáner de redes de código abierto más utilizado en el mundo de la ciberseguridad. Fue creado en 1997 por Gordon Lyon y hoy es una herramienta fundamental en cualquier auditoría de red. Permite descubrir qué dispositivos están activos en una red, qué puertos tienen abiertos, qué servicios están corriendo, qué versiones tienen esos servicios y qué sistema operativo usa cada host.
+      </p>
+
+      <h4 style="font-size:.82rem;color:var(--accent2);font-family:var(--mono);margin-bottom:.6rem">// ¿Para qué sirve en redes locales?</h4>
+      <p style="color:var(--muted);font-size:.87rem;line-height:1.85;margin-bottom:1rem">
+        En una red local (LAN), Nmap es el primer paso de cualquier auditoría de seguridad. Antes de buscar vulnerabilidades, necesitas saber <em>qué hay en la red</em>. Nmap responde exactamente esa pregunta: mapea la topología completa de la red, revelando todos los dispositivos conectados y los servicios que exponen.
+      </p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:1.25rem">
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem">
+          <div style="color:#58a6ff;font-weight:600;margin-bottom:.3rem">✦ Inventario de red</div>
+          <div style="color:var(--muted);line-height:1.6">Descubrir todos los dispositivos conectados: PCs, impresoras, routers, cámaras, IoT.</div>
+        </div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem">
+          <div style="color:#58a6ff;font-weight:600;margin-bottom:.3rem">✦ Auditoría de puertos</div>
+          <div style="color:var(--muted);line-height:1.6">Verificar qué puertos están abiertos innecesariamente y representan un riesgo.</div>
+        </div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem">
+          <div style="color:#58a6ff;font-weight:600;margin-bottom:.3rem">✦ Detección de versiones</div>
+          <div style="color:var(--muted);line-height:1.6">Identificar servicios desactualizados con versiones vulnerables conocidas (CVEs).</div>
+        </div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem">
+          <div style="color:#58a6ff;font-weight:600;margin-bottom:.3rem">✦ OS fingerprinting</div>
+          <div style="color:var(--muted);line-height:1.6">Determinar el sistema operativo de cada dispositivo para identificar parches faltantes.</div>
+        </div>
+      </div>
+
+      <h4 style="font-size:.82rem;color:var(--accent2);font-family:var(--mono);margin-bottom:.6rem">// ¿Cómo funciona?</h4>
+      <p style="color:var(--muted);font-size:.87rem;line-height:1.85;margin-bottom:1.25rem">
+        Nmap envía paquetes de red especialmente construidos a los hosts objetivo y analiza las respuestas. Dependiendo del tipo de escaneo, puede usar paquetes TCP SYN, UDP, ICMP o combinaciones de ellos. El <strong style="color:var(--text)">SYN scan</strong> (el más común) envía un paquete SYN y si recibe SYN-ACK sabe que el puerto está abierto, sin completar la conexión TCP (sigiloso). El análisis de respuestas a paquetes con flags especiales permite a Nmap "adivinar" el sistema operativo comparando el comportamiento con una base de datos de huellas digitales.
+      </p>
+
+      <h4 style="font-size:.82rem;color:var(--accent2);font-family:var(--mono);margin-bottom:.6rem">// Comandos principales</h4>
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:1rem 1.25rem;font-family:var(--mono);font-size:.77rem;line-height:2.1;margin-bottom:1.25rem">
+        <div><span style="color:var(--muted)"># Descubrir todos los hosts activos en la red</span></div>
+        <div style="margin-bottom:.4rem"><span style="color:var(--green)">nmap -sn 192.168.1.0/24</span></div>
+        <div><span style="color:var(--muted)"># Escaneo básico de puertos y versiones</span></div>
+        <div style="margin-bottom:.4rem"><span style="color:var(--green)">nmap -sV 192.168.1.1</span></div>
+        <div><span style="color:var(--muted)"># Escaneo SYN silencioso + OS + versiones (requiere root)</span></div>
+        <div style="margin-bottom:.4rem"><span style="color:var(--green)">sudo nmap -sS -O -sV 192.168.1.1</span></div>
+        <div><span style="color:var(--muted)"># Escaneo completo: todos los puertos + scripts de detección</span></div>
+        <div style="margin-bottom:.4rem"><span style="color:var(--green)">sudo nmap -sC -sV -p- 192.168.1.1</span></div>
+        <div><span style="color:var(--muted)"># Escaneo rápido de los 100 puertos más comunes</span></div>
+        <div style="margin-bottom:.4rem"><span style="color:var(--green)">nmap -F 192.168.1.0/24</span></div>
+        <div><span style="color:var(--muted)"># Guardar resultados en archivo</span></div>
+        <div><span style="color:var(--green)">nmap -oN resultado.txt 192.168.1.0/24</span></div>
+      </div>
+
+      <h4 style="font-size:.82rem;color:var(--accent2);font-family:var(--mono);margin-bottom:.6rem">// Ejemplo de salida real</h4>
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:1rem 1.25rem;font-family:var(--mono);font-size:.76rem;line-height:1.9;margin-bottom:1.25rem">
+        <div style="color:var(--muted)">Nmap scan report for <span style="color:#58a6ff">192.168.1.105</span></div>
+        <div style="color:var(--muted)">Host is up <span style="color:var(--green)">(0.0018s latency)</span>.</div>
+        <div style="color:var(--muted);margin-top:.4rem">PORT      STATE  SERVICE    VERSION</div>
+        <div><span style="color:var(--green)">22/tcp  </span> <span style="color:var(--muted)">open   ssh        </span><span style="color:#58a6ff">OpenSSH 7.9p1 Debian</span></div>
+        <div><span style="color:var(--green)">80/tcp  </span> <span style="color:var(--muted)">open   http       </span><span style="color:#58a6ff">Apache httpd 2.4.38</span></div>
+        <div><span style="color:#f85149)">3306/tcp</span> <span style="color:var(--muted)">open   mysql      </span><span style="color:#f85149">MySQL 5.7.33</span> <span style="color:var(--orange)">⚠ versión con CVEs</span></div>
+        <div style="color:var(--muted);margin-top:.4rem">OS: <span style="color:#58a6ff">Linux 4.x (Debian 10)</span></div>
+      </div>
+      <p style="font-size:.8rem;color:var(--muted);line-height:1.7;margin-bottom:1.25rem">
+        En este ejemplo, Nmap detectó que el puerto <strong style="color:var(--text)">3306</strong> (MySQL) está expuesto con la versión 5.7.33, que tiene vulnerabilidades críticas conocidas. Esta información permite al auditor priorizar la corrección de ese servicio.
+      </p>
+
+      <h4 style="font-size:.82rem;color:var(--accent2);font-family:var(--mono);margin-bottom:.6rem">// Tipos de escaneo</h4>
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:1.25rem">
+        <table style="width:100%;font-size:.78rem;border-collapse:collapse">
+          <thead><tr style="background:var(--bg3)">
+            <th style="padding:.6rem .9rem;text-align:left;color:var(--muted);font-weight:500;border-bottom:1px solid var(--border)">Flag</th>
+            <th style="padding:.6rem .9rem;text-align:left;color:var(--muted);font-weight:500;border-bottom:1px solid var(--border)">Tipo</th>
+            <th style="padding:.6rem .9rem;text-align:left;color:var(--muted);font-weight:500;border-bottom:1px solid var(--border)">Descripción</th>
+          </tr></thead>
+          <tbody>
+            <tr style="border-bottom:1px solid var(--border2)"><td style="padding:.55rem .9rem;font-family:var(--mono);color:var(--green)">-sS</td><td style="padding:.55rem .9rem;color:var(--text)">SYN scan</td><td style="padding:.55rem .9rem;color:var(--muted)">Sigiloso, no completa la conexión TCP</td></tr>
+            <tr style="border-bottom:1px solid var(--border2)"><td style="padding:.55rem .9rem;font-family:var(--mono);color:var(--green)">-sT</td><td style="padding:.55rem .9rem;color:var(--text)">TCP Connect</td><td style="padding:.55rem .9rem;color:var(--muted)">Conexión completa, más detectable</td></tr>
+            <tr style="border-bottom:1px solid var(--border2)"><td style="padding:.55rem .9rem;font-family:var(--mono);color:var(--green)">-sU</td><td style="padding:.55rem .9rem;color:var(--text)">UDP scan</td><td style="padding:.55rem .9rem;color:var(--muted)">Escanea puertos UDP (DNS, SNMP, DHCP)</td></tr>
+            <tr style="border-bottom:1px solid var(--border2)"><td style="padding:.55rem .9rem;font-family:var(--mono);color:var(--green)">-sn</td><td style="padding:.55rem .9rem;color:var(--text)">Ping scan</td><td style="padding:.55rem .9rem;color:var(--muted)">Solo descubre hosts, no escanea puertos</td></tr>
+            <tr><td style="padding:.55rem .9rem;font-family:var(--mono);color:var(--green)">-sC</td><td style="padding:.55rem .9rem;color:var(--text)">Script scan</td><td style="padding:.55rem .9rem;color:var(--muted)">Ejecuta scripts NSE por defecto</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="background:rgba(56,139,253,.08);border:1px solid rgba(56,139,253,.2);border-left:3px solid #58a6ff;border-radius:8px;padding:.9rem 1rem;margin-bottom:.75rem;font-size:.83rem;color:var(--muted)">
+        <strong style="color:#58a6ff">ℹ Caso de uso real:</strong> Un administrador de red ejecuta Nmap mensualmente en la LAN corporativa para verificar que no aparezcan nuevos dispositivos no autorizados ni puertos abiertos no esperados. Es el equivalente digital de un inventario físico.
+      </div>
+      <div style="background:rgba(248,81,73,.08);border:1px solid rgba(248,81,73,.2);border-left:3px solid #f85149;border-radius:8px;padding:.9rem 1rem;font-size:.83rem;color:var(--muted)">
+        <strong style="color:#f85149">⚠ Uso ético:</strong> Escanear redes ajenas sin autorización es ilegal en Colombia bajo la Ley 1273 de 2009. Nmap debe usarse únicamente en redes propias o con permiso escrito del propietario.
       </div>
     `
   },
@@ -776,7 +895,7 @@ const toolData = {
         <div><span style="color:var(--green)">tcp.port == 443</span>   <span style="color:var(--muted)"># Solo puerto HTTPS</span></div>
         <div><span style="color:var(--green)">dns</span>               <span style="color:var(--muted)"># Consultas DNS</span></div>
       </div>
-      <div style="background:rgba(63,185,80,.08);border:1px solid rgba(63,185,80,.2);border-radius:8px;padding:.9rem 1rem;margin-top:1.25rem;font-size:.82rem;color:var(--muted)">
+      <div style="background:rgba(63,185,80,.08);border:1px solid rgba(63,185,80,.2);border-left:3px solid var(--green);border-radius:8px;padding:.9rem 1rem;margin-top:1.25rem;font-size:.82rem;color:var(--muted)">
         <strong style="color:var(--green)">ℹ Caso de uso:</strong> Detectar credenciales transmitidas en texto plano (HTTP sin cifrar), identificar dispositivos que hacen peticiones inusuales o analizar la latencia de una aplicación.
       </div>
     `
@@ -795,8 +914,144 @@ const toolData = {
         <div><span style="color:var(--green)">set RHOSTS 192.168.1.10</span>     <span style="color:var(--muted)"># Definir objetivo</span></div>
         <div><span style="color:var(--green)">show options</span>                 <span style="color:var(--muted)"># Ver configuración</span></div>
       </div>
-      <div style="background:rgba(248,81,73,.08);border:1px solid rgba(248,81,73,.2);border-radius:8px;padding:.9rem 1rem;margin-top:1.25rem;font-size:.82rem;color:var(--muted)">
+      <div style="background:rgba(248,81,73,.08);border:1px solid rgba(248,81,73,.2);border-left:3px solid var(--red);border-radius:8px;padding:.9rem 1rem;margin-top:1.25rem;font-size:.82rem;color:var(--muted)">
         <strong style="color:var(--red)">⚠ Importante:</strong> Metasploit solo debe usarse en sistemas propios o con autorización expresa. Su uso no autorizado es ilegal según la Ley 1273 de 2009.
+      </div>
+    `
+  },
+  grafana: {
+    title: 'Grafana — Visualización y Monitoreo',
+    body: `
+      <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1.25rem">
+        <div style="width:44px;height:44px;border-radius:12px;background:rgba(56,189,248,.12);color:#38bdf8;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0"><i class="fa-solid fa-chart-line"></i></div>
+        <div>
+          <div style="font-size:.7rem;font-family:var(--mono);color:#38bdf8;margin-bottom:.2rem">MONITOREO · VISUALIZACIÓN · CÓDIGO ABIERTO</div>
+          <div style="font-size:.82rem;color:var(--muted)">Grafana Labs · Licencia AGPL-3.0 · grafana.com</div>
+        </div>
+      </div>
+
+      <h4 style="font-size:.82rem;color:#38bdf8;font-family:var(--mono);margin-bottom:.6rem">// ¿Qué es?</h4>
+      <p style="color:var(--muted);font-size:.87rem;line-height:1.85;margin-bottom:1.25rem">
+        <strong style="color:var(--text)">Grafana</strong> es una plataforma de código abierto para la visualización y análisis de métricas, logs y trazas. Permite crear dashboards interactivos en tiempo real que transforman datos crudos de red en gráficas comprensibles. En el contexto de ciberseguridad, se usa para visualizar el tráfico de red, detectar picos anómalos, correlacionar eventos de seguridad y monitorear el estado de los servicios de forma continua.
+      </p>
+
+      <h4 style="font-size:.82rem;color:#38bdf8;font-family:var(--mono);margin-bottom:.6rem">// ¿Para qué sirve en seguridad de redes?</h4>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:1.25rem">
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem">
+          <div style="color:#38bdf8;font-weight:600;margin-bottom:.3rem">✦ Detección de anomalías</div>
+          <div style="color:var(--muted);line-height:1.6">Visualizar picos de tráfico, conexiones inusuales o comportamientos fuera de lo normal.</div>
+        </div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem">
+          <div style="color:#38bdf8;font-weight:600;margin-bottom:.3rem">✦ Dashboards de seguridad</div>
+          <div style="color:var(--muted);line-height:1.6">Centralizar métricas de múltiples herramientas (Zabbix, Prometheus, logs del sistema) en una sola vista.</div>
+        </div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem">
+          <div style="color:#38bdf8;font-weight:600;margin-bottom:.3rem">✦ Alertas automáticas</div>
+          <div style="color:var(--muted);line-height:1.6">Configurar alertas que notifican cuando un umbral se supera (ej: más de 1000 conexiones/min).</div>
+        </div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem">
+          <div style="color:#38bdf8;font-weight:600;margin-bottom:.3rem">✦ Histórico de eventos</div>
+          <div style="color:var(--muted);line-height:1.6">Analizar el comportamiento de la red en el tiempo para identificar patrones de ataque.</div>
+        </div>
+      </div>
+
+      <h4 style="font-size:.82rem;color:#38bdf8;font-family:var(--mono);margin-bottom:.6rem">// Comandos de instalación y uso</h4>
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:1rem 1.25rem;font-family:var(--mono);font-size:.77rem;line-height:2.1;margin-bottom:1.25rem">
+        <div><span style="color:var(--muted)"># Iniciar el servidor de Grafana</span></div>
+        <div style="margin-bottom:.4rem"><span style="color:var(--green)">sudo systemctl start grafana-server</span></div>
+        <div><span style="color:var(--muted)"># Activar al inicio del sistema</span></div>
+        <div style="margin-bottom:.4rem"><span style="color:var(--green)">sudo systemctl enable grafana-server</span></div>
+        <div><span style="color:var(--muted)"># Acceder desde el navegador (puerto por defecto)</span></div>
+        <div style="margin-bottom:.4rem"><span style="color:var(--green)">http://localhost:3000</span>  <span style="color:var(--muted)"># admin / admin</span></div>
+        <div><span style="color:var(--muted)"># Ver estado del servicio</span></div>
+        <div><span style="color:var(--green)">sudo systemctl status grafana-server</span></div>
+      </div>
+
+      <div style="background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.2);border-left:3px solid #38bdf8;border-radius:8px;padding:.9rem 1rem;font-size:.83rem;color:var(--muted)">
+        <strong style="color:#38bdf8">ℹ Nota importante:</strong> Grafana no es una herramienta de ataque — es una herramienta de <em>monitoreo defensivo</em>. Se integra con fuentes de datos como Prometheus, InfluxDB, Elasticsearch o directamente con Zabbix para mostrar el estado de la red en tiempo real.
+      </div>
+    `
+  },
+  zabbix: {
+    title: 'Zabbix — Monitoreo de Red Empresarial',
+    body: `
+      <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1.25rem">
+        <div style="width:44px;height:44px;border-radius:12px;background:rgba(56,189,248,.12);color:#38bdf8;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0"><i class="fa-solid fa-tower-broadcast"></i></div>
+        <div>
+          <div style="font-size:.7rem;font-family:var(--mono);color:#38bdf8;margin-bottom:.2rem">MONITOREO · REDES · CÓDIGO ABIERTO</div>
+          <div style="font-size:.82rem;color:var(--muted)">Zabbix LLC · Licencia GPL-2.0 · zabbix.com</div>
+        </div>
+      </div>
+
+      <h4 style="font-size:.82rem;color:#38bdf8;font-family:var(--mono);margin-bottom:.6rem">// ¿Qué es?</h4>
+      <p style="color:var(--muted);font-size:.87rem;line-height:1.85;margin-bottom:1.25rem">
+        <strong style="color:var(--text)">Zabbix</strong> es una plataforma de monitoreo de red y sistemas de código abierto, diseñada para supervisar la disponibilidad, el rendimiento y la seguridad de infraestructuras de TI. Puede monitorear servidores, dispositivos de red (routers, switches), máquinas virtuales y aplicaciones, enviando alertas cuando algo sale de los parámetros normales. Es muy usado en entornos empresariales para detectar fallos y comportamientos sospechosos antes de que se conviertan en incidentes de seguridad.
+      </p>
+
+      <h4 style="font-size:.82rem;color:#38bdf8;font-family:var(--mono);margin-bottom:.6rem">// ¿Cómo ayuda en la detección de vulnerabilidades?</h4>
+      <p style="color:var(--muted);font-size:.87rem;line-height:1.85;margin-bottom:1.25rem">
+        Zabbix monitorea en tiempo real métricas como el uso de CPU, tráfico de red, intentos de login fallidos, disponibilidad de servicios y cambios en la configuración. Al configurar <strong style="color:var(--text)">umbrales y disparadores (triggers)</strong>, el sistema notifica automáticamente cuando detecta algo anormal — por ejemplo, un número inusualmente alto de conexiones que podría indicar un escaneo de puertos o un ataque de fuerza bruta.
+      </p>
+
+      <h4 style="font-size:.82rem;color:#38bdf8;font-family:var(--mono);margin-bottom:.6rem">// Comandos principales</h4>
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:1rem 1.25rem;font-family:var(--mono);font-size:.77rem;line-height:2.1;margin-bottom:1.25rem">
+        <div><span style="color:var(--muted)"># Iniciar el servidor Zabbix</span></div>
+        <div style="margin-bottom:.4rem"><span style="color:var(--green)">sudo systemctl start zabbix-server</span></div>
+        <div><span style="color:var(--muted)"># Iniciar el agente en un host monitoreado</span></div>
+        <div style="margin-bottom:.4rem"><span style="color:var(--green)">sudo systemctl start zabbix-agent</span></div>
+        <div><span style="color:var(--muted)"># Ver logs del servidor</span></div>
+        <div style="margin-bottom:.4rem"><span style="color:var(--green)">tail -f /var/log/zabbix/zabbix_server.log</span></div>
+        <div><span style="color:var(--muted)"># Acceder a la interfaz web</span></div>
+        <div><span style="color:var(--green)">http://localhost/zabbix</span>  <span style="color:var(--muted)"># Admin / zabbix</span></div>
+      </div>
+
+      <div style="background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.2);border-left:3px solid #38bdf8;border-radius:8px;padding:.9rem 1rem;font-size:.83rem;color:var(--muted)">
+        <strong style="color:#38bdf8">ℹ Relación con Grafana:</strong> Zabbix puede integrarse con Grafana como fuente de datos, lo que permite crear dashboards visuales más elaborados con los datos de monitoreo que recopila Zabbix. Son herramientas complementarias muy usadas juntas en entornos de seguridad.
+      </div>
+    `
+  },
+  deephat: {
+    title: 'Deephat — Enumeración y Análisis Profundo',
+    body: `
+      <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1.25rem">
+        <div style="width:44px;height:44px;border-radius:12px;background:rgba(248,81,73,.12);color:#f85149;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0"><i class="fa-solid fa-hat-wizard"></i></div>
+        <div>
+          <div style="font-size:.7rem;font-family:var(--mono);color:#f85149;margin-bottom:.2rem">ENUMERACIÓN · VULNERABILIDADES · KALI LINUX</div>
+          <div style="font-size:.82rem;color:var(--muted)">Herramienta de análisis profundo de vectores de ataque</div>
+        </div>
+      </div>
+
+      <div style="background:rgba(210,153,34,.08);border:1px solid rgba(210,153,34,.25);border-left:3px solid var(--orange);border-radius:8px;padding:.9rem 1rem;margin-bottom:1.25rem;font-size:.83rem;color:var(--muted)">
+        <strong style="color:var(--orange)">📌 Nota del equipo:</strong> Estamos verificando la documentación oficial de esta herramienta para presentar información precisa. El contenido detallado estará disponible en el siguiente avance del proyecto.
+      </div>
+
+      <h4 style="font-size:.82rem;color:var(--red);font-family:var(--mono);margin-bottom:.6rem">// ¿Qué es?</h4>
+      <p style="color:var(--muted);font-size:.87rem;line-height:1.85;margin-bottom:1.25rem">
+        <strong style="color:var(--text)">Deephat</strong> es una herramienta orientada a la enumeración profunda y el análisis de vectores de ataque en redes locales. A diferencia de escáneres generales como Nmap, Deephat se especializa en profundizar en los servicios encontrados, identificando configuraciones inseguras, credenciales por defecto, rutas expuestas y posibles puntos de entrada para un atacante.
+      </p>
+
+      <h4 style="font-size:.82rem;color:var(--red);font-family:var(--mono);margin-bottom:.6rem">// Casos de uso principales</h4>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:1.25rem">
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem">
+          <div style="color:#f85149;font-weight:600;margin-bottom:.3rem">✦ Enumeración de servicios</div>
+          <div style="color:var(--muted);line-height:1.6">Identificar en profundidad qué información expone cada servicio activo en la red.</div>
+        </div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem">
+          <div style="color:#f85149;font-weight:600;margin-bottom:.3rem">✦ Detección de configuraciones</div>
+          <div style="color:var(--muted);line-height:1.6">Encontrar credenciales por defecto y configuraciones inseguras en dispositivos de red.</div>
+        </div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem">
+          <div style="color:#f85149;font-weight:600;margin-bottom:.3rem">✦ Mapeo de vectores</div>
+          <div style="color:var(--muted);line-height:1.6">Construir un mapa de los posibles vectores de ataque disponibles en la red auditada.</div>
+        </div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem">
+          <div style="color:#f85149;font-weight:600;margin-bottom:.3rem">✦ Reportes de riesgo</div>
+          <div style="color:var(--muted);line-height:1.6">Generar reportes que priorizan los hallazgos por nivel de riesgo (crítico, alto, medio, bajo).</div>
+        </div>
+      </div>
+
+      <div style="background:rgba(248,81,73,.08);border:1px solid rgba(248,81,73,.2);border-left:3px solid #f85149;border-radius:8px;padding:.9rem 1rem;font-size:.83rem;color:var(--muted)">
+        <strong style="color:#f85149">⚠ Uso ético:</strong> Como toda herramienta de análisis de vulnerabilidades, Deephat debe utilizarse únicamente con autorización expresa del propietario de la red. Su uso no autorizado está tipificado como delito en la Ley 1273 de 2009.
       </div>
     `
   }
