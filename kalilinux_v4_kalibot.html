@@ -1,0 +1,1725 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VulnScan Lab — Detección de Vulnerabilidades con Kali Linux</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+  /* ── Reset & Base ─────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg:       #0d1117;
+    --bg2:      #161b22;
+    --bg3:      #21262d;
+    --border:   #30363d;
+    --border2:  #21262d;
+    --text:     #e6edf3;
+    --muted:    #8b949e;
+    --accent:   #388bfd;
+    --accent2:  #58a6ff;
+    --green:    #3fb950;
+    --orange:   #d29922;
+    --red:      #f85149;
+    --purple:   #bc8cff;
+    --teal:     #39d353;
+    --nav-h:    64px;
+    --mono:     'JetBrains Mono', monospace;
+    --sans:     'Space Grotesk', sans-serif;
+  }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+  a { color: var(--accent2); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* ── Grid noise texture via pseudo ───────── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      radial-gradient(circle at 15% 50%, rgba(56,139,253,.07) 0%, transparent 50%),
+      radial-gradient(circle at 85% 20%, rgba(63,185,80,.06) 0%, transparent 40%);
+    pointer-events: none; z-index: 0;
+  }
+
+  /* ── Navbar ──────────────────────────────── */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    height: var(--nav-h);
+    background: rgba(13,17,23,.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center;
+    padding: 0 2rem; gap: 2rem;
+  }
+  .nav-logo {
+    display: flex; align-items: center; gap: .6rem;
+    font-size: 1.05rem; font-weight: 700; color: var(--text);
+    letter-spacing: -.3px;
+  }
+  .nav-logo .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--green); box-shadow: 0 0 8px var(--green);
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.6;transform:scale(.85)} }
+  .nav-links {
+    display: flex; gap: .25rem; list-style: none; margin-left: auto;
+  }
+  .nav-links a {
+    color: var(--muted); font-size: .875rem; font-weight: 500;
+    padding: .4rem .75rem; border-radius: 6px;
+    transition: color .15s, background .15s;
+  }
+  .nav-links a:hover { color: var(--text); background: var(--bg3); text-decoration: none; }
+  .nav-links a.active { color: var(--accent2); }
+  .badge-new {
+    font-size: .65rem; font-family: var(--mono);
+    background: rgba(56,139,253,.15); color: var(--accent2);
+    border: 1px solid rgba(56,139,253,.3);
+    padding: .1rem .35rem; border-radius: 4px; margin-left: .3rem;
+  }
+  .nav-cta {
+    margin-left: 1rem;
+    background: var(--accent); color: #fff;
+    font-size: .8rem; font-weight: 600;
+    padding: .4rem .9rem; border-radius: 6px;
+    transition: opacity .15s;
+  }
+  .nav-cta:hover { opacity: .85; text-decoration: none; }
+
+  /* ── Hero ─────────────────────────────────── */
+  .hero {
+    position: relative; z-index: 1;
+    max-width: 900px; margin: 0 auto;
+    padding: 7rem 2rem 5rem;
+    text-align: center;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: .5rem;
+    background: rgba(63,185,80,.1); border: 1px solid rgba(63,185,80,.25);
+    color: var(--green); font-size: .8rem; font-family: var(--mono);
+    padding: .3rem .8rem; border-radius: 999px; margin-bottom: 2rem;
+  }
+  .hero h1 {
+    font-size: clamp(2.2rem, 5vw, 3.6rem);
+    font-weight: 700; letter-spacing: -.8px;
+    line-height: 1.15; margin-bottom: 1.5rem;
+  }
+  .hero h1 span { color: var(--accent2); }
+  .hero p {
+    font-size: 1.1rem; color: var(--muted); max-width: 600px;
+    margin: 0 auto 2.5rem; line-height: 1.8;
+  }
+  .hero-btns { display: flex; gap: .75rem; justify-content: center; flex-wrap: wrap; }
+  .btn-primary {
+    background: var(--accent); color: #fff;
+    font-weight: 600; font-size: .9rem;
+    padding: .65rem 1.4rem; border-radius: 8px;
+    border: none; cursor: pointer; transition: opacity .15s;
+    display: inline-flex; align-items: center; gap: .4rem;
+  }
+  .btn-primary:hover { opacity: .85; text-decoration: none; }
+  .btn-ghost {
+    background: transparent; color: var(--text);
+    font-weight: 500; font-size: .9rem;
+    padding: .65rem 1.4rem; border-radius: 8px;
+    border: 1px solid var(--border); cursor: pointer;
+    transition: background .15s, border-color .15s;
+    display: inline-flex; align-items: center; gap: .4rem;
+  }
+  .btn-ghost:hover { background: var(--bg3); border-color: var(--muted); text-decoration: none; }
+
+  /* ── Terminal demo ───────────────────────── */
+  .terminal {
+    position: relative; z-index: 1;
+    max-width: 720px; margin: 0 auto 4rem;
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 12px; overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,.5);
+  }
+  .terminal-bar {
+    background: var(--bg3); padding: .7rem 1rem;
+    display: flex; align-items: center; gap: .5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .terminal-dot { width: 12px; height: 12px; border-radius: 50%; }
+  .terminal-dot.r { background: #ff5f57; }
+  .terminal-dot.y { background: #febc2e; }
+  .terminal-dot.g { background: #28c840; }
+  .terminal-title {
+    margin-left: auto; margin-right: auto;
+    font-size: .75rem; font-family: var(--mono); color: var(--muted);
+  }
+  .terminal-body { padding: 1.25rem 1.5rem; font-family: var(--mono); font-size: .82rem; line-height: 1.9; }
+  .t-prompt { color: var(--green); }
+  .t-cmd { color: var(--text); }
+  .t-flag { color: var(--orange); }
+  .t-output { color: var(--muted); }
+  .t-highlight { color: var(--accent2); }
+  .t-red { color: var(--red); }
+  .t-green { color: var(--green); }
+  .cursor { display: inline-block; width: 8px; height: 14px; background: var(--green); vertical-align: middle; animation: blink 1s step-end infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+  /* ── Stats ────────────────────────────────── */
+  .stats {
+    position: relative; z-index: 1;
+    display: flex; justify-content: center; flex-wrap: wrap;
+    gap: 1px; max-width: 800px; margin: 0 auto 5rem;
+    background: var(--border); border-radius: 12px; overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .stat {
+    flex: 1; min-width: 160px;
+    background: var(--bg2); padding: 1.5rem 1rem; text-align: center;
+  }
+  .stat-num { font-size: 1.8rem; font-weight: 700; color: var(--text); line-height: 1; }
+  .stat-label { font-size: .8rem; color: var(--muted); margin-top: .35rem; }
+
+  /* ── Sections ────────────────────────────── */
+  section { position: relative; z-index: 1; }
+  .section-header {
+    text-align: center; max-width: 600px; margin: 0 auto 3rem;
+  }
+  .section-tag {
+    display: inline-block;
+    font-size: .75rem; font-family: var(--mono); font-weight: 500;
+    color: var(--accent2); letter-spacing: .8px;
+    margin-bottom: .75rem; text-transform: uppercase;
+  }
+  .section-header h2 {
+    font-size: clamp(1.6rem, 3vw, 2.2rem);
+    font-weight: 700; letter-spacing: -.4px; margin-bottom: .75rem;
+  }
+  .section-header p { color: var(--muted); font-size: .95rem; }
+
+  /* ── Tools grid ──────────────────────────── */
+  .tools-section { padding: 5rem 2rem; }
+  .tools-filters {
+    display: flex; justify-content: center; flex-wrap: wrap;
+    gap: .5rem; margin-bottom: 2.5rem;
+  }
+  .filter-btn {
+    background: transparent; color: var(--muted);
+    font-size: .8rem; font-family: var(--sans); font-weight: 500;
+    padding: .35rem .85rem; border-radius: 999px;
+    border: 1px solid var(--border); cursor: pointer;
+    transition: all .15s;
+  }
+  .filter-btn:hover, .filter-btn.active {
+    background: var(--accent); color: #fff; border-color: var(--accent);
+  }
+  .tools-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1px; max-width: 1100px; margin: 0 auto;
+    background: var(--border); border-radius: 16px; overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .tool-card {
+    background: var(--bg2); padding: 1.5rem;
+    cursor: pointer; transition: background .15s;
+    display: flex; flex-direction: column; gap: .75rem;
+  }
+  .tool-card:hover { background: var(--bg3); }
+  .tool-card-head {
+    display: flex; align-items: flex-start; justify-content: space-between;
+  }
+  .tool-icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+  }
+  .tool-category-badge {
+    font-size: .7rem; font-family: var(--mono);
+    padding: .2rem .5rem; border-radius: 4px; font-weight: 500;
+  }
+  .tool-card h3 { font-size: 1rem; font-weight: 600; }
+  .tool-card p { font-size: .82rem; color: var(--muted); line-height: 1.6; flex: 1; }
+  .tool-cmd {
+    font-family: var(--mono); font-size: .75rem;
+    background: var(--bg); border: 1px solid var(--border);
+    color: var(--green); padding: .3rem .65rem; border-radius: 6px;
+    display: inline-block;
+  }
+
+  /* category colors */
+  .cat-recon   { background: rgba(56,139,253,.12); color: var(--accent2); }
+  .cat-traffic { background: rgba(63,185,80,.12);  color: var(--green); }
+  .cat-web     { background: rgba(188,140,255,.12);color: var(--purple); }
+  .cat-vuln    { background: rgba(210,153,34,.12); color: var(--orange); }
+  .cat-exploit { background: rgba(248,81,73,.12);  color: var(--red); }
+  .cat-wifi    { background: rgba(57,211,83,.12);  color: var(--teal); }
+  .cat-monitor { background: rgba(56,189,248,.12); color: #38bdf8; }
+  .icon-recon   { background: rgba(56,139,253,.1);  color: var(--accent2); }
+  .icon-traffic { background: rgba(63,185,80,.1);   color: var(--green); }
+  .icon-web     { background: rgba(188,140,255,.1); color: var(--purple); }
+  .icon-vuln    { background: rgba(210,153,34,.1);  color: var(--orange); }
+  .icon-exploit { background: rgba(248,81,73,.1);   color: var(--red); }
+  .icon-wifi    { background: rgba(57,211,83,.1);   color: var(--teal); }
+  .icon-monitor { background: rgba(56,189,248,.1);  color: #38bdf8; }
+
+  /* ── How it works ────────────────────────── */
+  .how-section { padding: 5rem 2rem; border-top: 1px solid var(--border2); }
+  .steps {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem; max-width: 900px; margin: 0 auto;
+  }
+  .step {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 12px; padding: 1.5rem;
+    position: relative; overflow: hidden;
+  }
+  .step::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--green));
+  }
+  .step-num {
+    font-size: 2rem; font-weight: 700; font-family: var(--mono);
+    color: var(--border); line-height: 1; margin-bottom: .75rem;
+  }
+  .step h3 { font-size: .95rem; font-weight: 600; margin-bottom: .5rem; }
+  .step p  { font-size: .82rem; color: var(--muted); line-height: 1.6; }
+
+  /* ── Glossary preview ─────────────────────── */
+  .glossary-section { padding: 5rem 2rem; border-top: 1px solid var(--border2); }
+  .glossary-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem; max-width: 900px; margin: 0 auto;
+  }
+  .glossary-item {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 10px; padding: 1rem 1.2rem;
+  }
+  .glossary-term {
+    font-family: var(--mono); font-size: .85rem; font-weight: 500;
+    color: var(--accent2); margin-bottom: .3rem;
+  }
+  .glossary-def { font-size: .82rem; color: var(--muted); line-height: 1.6; }
+
+  /* ── Ethics section ──────────────────────── */
+  .ethics-section { padding: 5rem 2rem; border-top: 1px solid var(--border2); }
+  .ethics-card {
+    max-width: 750px; margin: 0 auto;
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 16px; padding: 2.5rem;
+    display: grid; grid-template-columns: auto 1fr; gap: 2rem;
+    align-items: start;
+  }
+  .ethics-icon {
+    width: 52px; height: 52px; border-radius: 14px;
+    background: rgba(248,81,73,.1); color: var(--red);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem; flex-shrink: 0;
+  }
+  .ethics-card h3 { font-size: 1.15rem; font-weight: 600; margin-bottom: .75rem; }
+  .ethics-card p  { font-size: .88rem; color: var(--muted); line-height: 1.8; }
+  .ethics-pills { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1.25rem; }
+  .pill {
+    font-size: .75rem; font-family: var(--mono);
+    padding: .25rem .6rem; border-radius: 5px;
+    background: rgba(63,185,80,.1); color: var(--green);
+    border: 1px solid rgba(63,185,80,.2);
+  }
+
+  /* ── Newsletter / CTA banner ─────────────── */
+  .cta-section {
+    padding: 5rem 2rem; border-top: 1px solid var(--border2);
+    text-align: center;
+  }
+  .cta-box {
+    max-width: 600px; margin: 0 auto;
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 20px; padding: 3rem 2rem;
+    position: relative; overflow: hidden;
+  }
+  .cta-box::before {
+    content: '';
+    position: absolute; top: -60px; left: 50%; transform: translateX(-50%);
+    width: 300px; height: 300px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(56,139,253,.08), transparent 70%);
+    pointer-events: none;
+  }
+  .cta-box h2 { font-size: 1.6rem; font-weight: 700; margin-bottom: .75rem; }
+  .cta-box p { color: var(--muted); font-size: .9rem; margin-bottom: 1.5rem; }
+
+  /* ── Footer ──────────────────────────────── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 2.5rem 2rem;
+    display: flex; flex-wrap: wrap;
+    justify-content: space-between; align-items: center;
+    gap: 1rem; font-size: .8rem; color: var(--muted);
+  }
+  .footer-logo { font-weight: 700; color: var(--text); }
+  .footer-links { display: flex; gap: 1.25rem; }
+  .footer-links a { color: var(--muted); }
+  .footer-links a:hover { color: var(--text); text-decoration: none; }
+
+  /* ── Misc ─────────────────────────────────── */
+  .container { max-width: 1100px; margin: 0 auto; }
+  .divider { border: none; border-top: 1px solid var(--border2); margin: 0; }
+
+  /* ── Skeleton overlay for boceto effect ───── */
+  .wip-banner {
+    position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 200;
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 10px; padding: .75rem 1.1rem;
+    font-size: .78rem; font-family: var(--mono);
+    color: var(--orange); display: flex; align-items: center; gap: .5rem;
+    box-shadow: 0 8px 24px rgba(0,0,0,.4);
+  }
+  .wip-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--orange); animation: pulse 1.5s ease-in-out infinite; }
+
+  /* ── Responsive ──────────────────────────── */
+  @media (max-width: 640px) {
+    .nav-links { display: none; }
+    .ethics-card { grid-template-columns: 1fr; }
+    .terminal-body { font-size: .72rem; }
+  }
+
+  /* ══════════════════════════════════════════
+     KALIBOT — Asistente IA flotante
+  ══════════════════════════════════════════ */
+
+  /* Botón flotante fijo */
+  #kalibot-fab {
+    position: fixed; bottom: 1.75rem; right: 1.75rem; z-index: 900;
+    width: 54px; height: 54px; border-radius: 16px;
+    background: linear-gradient(135deg, #6e40c9, #388bfd);
+    border: none; cursor: pointer; color: #fff; font-size: 1.1rem;
+    box-shadow: 0 4px 20px rgba(110,64,201,.5);
+    display: flex; align-items: center; justify-content: center;
+    transition: transform .2s, box-shadow .2s;
+  }
+  #kalibot-fab:hover { transform: scale(1.08); box-shadow: 0 6px 28px rgba(110,64,201,.65); }
+  #kalibot-fab .fab-badge {
+    position: absolute; top: -4px; right: -4px;
+    background: var(--green); width: 14px; height: 14px;
+    border-radius: 50%; border: 2px solid var(--bg);
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  /* Panel principal del chat */
+  #kalibot-panel {
+    position: fixed; bottom: 5.5rem; right: 1.75rem; z-index: 901;
+    width: 400px; max-height: 580px;
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 18px; display: flex; flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0,0,0,.6);
+    overflow: hidden;
+    transform: scale(.92) translateY(16px);
+    opacity: 0; pointer-events: none;
+    transition: transform .22s cubic-bezier(.34,1.56,.64,1), opacity .18s ease;
+  }
+  #kalibot-panel.open {
+    transform: scale(1) translateY(0);
+    opacity: 1; pointer-events: all;
+  }
+
+  /* Header del panel */
+  .kb-header {
+    display: flex; align-items: center; gap: .65rem;
+    padding: .9rem 1.1rem;
+    background: var(--bg3); border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .kb-avatar {
+    width: 34px; height: 34px; border-radius: 10px; flex-shrink: 0;
+    background: linear-gradient(135deg, rgba(110,64,201,.35), rgba(56,139,253,.25));
+    border: 1px solid rgba(188,140,255,.3);
+    display: flex; align-items: center; justify-content: center;
+    font-size: .85rem; color: var(--purple);
+  }
+  .kb-info { flex: 1; }
+  .kb-name { font-size: .88rem; font-weight: 700; color: var(--text); }
+  .kb-status { font-size: .72rem; color: var(--green); display: flex; align-items: center; gap: .3rem; }
+  .kb-status::before { content:''; width:6px; height:6px; border-radius:50%; background:var(--green); display:inline-block; }
+  .kb-actions { display: flex; gap: .3rem; }
+  .kb-btn {
+    background: none; border: none; cursor: pointer; color: var(--muted);
+    font-size: .8rem; padding: .3rem .4rem; border-radius: 5px;
+    transition: color .15s, background .15s;
+  }
+  .kb-btn:hover { color: var(--text); background: var(--border); }
+
+  /* Chips de sugerencias */
+  .kb-suggestions {
+    display: flex; flex-wrap: wrap; gap: .4rem;
+    padding: .75rem 1rem; border-bottom: 1px solid var(--border2);
+    flex-shrink: 0;
+  }
+  .kb-chip {
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 999px; padding: .22rem .65rem;
+    font-size: .71rem; color: var(--muted); cursor: pointer;
+    transition: all .14s; white-space: nowrap;
+  }
+  .kb-chip:hover { border-color: var(--purple); color: var(--purple); background: rgba(188,140,255,.08); }
+
+  /* Área de mensajes */
+  .kb-messages {
+    flex: 1; overflow-y: auto; padding: .9rem 1rem;
+    display: flex; flex-direction: column; gap: .9rem;
+    scroll-behavior: smooth;
+  }
+  .kb-messages::-webkit-scrollbar { width: 3px; }
+  .kb-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* Burbuja de bienvenida */
+  .kb-welcome {
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 12px; border-top-left-radius: 3px;
+    padding: .8rem 1rem; font-size: .82rem; color: var(--muted); line-height: 1.7;
+  }
+  .kb-welcome strong { color: var(--text); }
+
+  /* Mensajes */
+  .kb-msg { display: flex; gap: .55rem; }
+  .kb-msg.user { flex-direction: row-reverse; }
+  .kb-msg-av {
+    width: 26px; height: 26px; border-radius: 8px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; font-size: .65rem;
+  }
+  .kb-msg.bot .kb-msg-av  { background:rgba(188,140,255,.15); color:var(--purple); border:1px solid rgba(188,140,255,.25); }
+  .kb-msg.user .kb-msg-av { background:rgba(63,185,80,.12); color:var(--green); border:1px solid rgba(63,185,80,.25); }
+  .kb-bubble {
+    max-width: 88%; padding: .6rem .85rem;
+    border-radius: 12px; font-size: .81rem; line-height: 1.7;
+  }
+  .kb-msg.bot  .kb-bubble { background:var(--bg3); border:1px solid var(--border); border-top-left-radius:3px; color:var(--text); }
+  .kb-msg.user .kb-bubble { background:rgba(56,139,253,.12); border:1px solid rgba(56,139,253,.25); border-top-right-radius:3px; color:var(--text); }
+
+  /* Código dentro de burbujas */
+  .kb-bubble code {
+    font-family: var(--mono); font-size: .75rem;
+    background: var(--bg); border:1px solid var(--border);
+    padding: .1rem .3rem; border-radius: 4px; color: var(--green);
+  }
+  .kb-bubble pre {
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 7px; padding: .65rem .8rem; margin: .5rem 0;
+    overflow-x: auto; font-family: var(--mono); font-size: .73rem;
+    line-height: 1.75; color: var(--green);
+  }
+  .kb-bubble strong { color: var(--accent2); }
+  .kb-bubble ul { padding-left: 1.1rem; margin: .3rem 0; }
+  .kb-bubble li { margin-bottom: .2rem; color: var(--muted); font-size: .79rem; }
+  .kb-bubble p { margin-bottom: .4rem; }
+  .kb-bubble p:last-child { margin-bottom: 0; }
+
+  /* Typing */
+  .kb-typing {
+    display: flex; gap: .55rem; align-items: flex-end;
+  }
+  .kb-typing-dots {
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 12px; border-top-left-radius: 3px;
+    padding: .55rem .8rem; display: flex; gap: 4px; align-items: center;
+  }
+  .kb-typing-dots span {
+    width: 5px; height: 5px; background: var(--purple);
+    border-radius: 50%; animation: kb-bounce 1.2s ease-in-out infinite;
+  }
+  .kb-typing-dots span:nth-child(2) { animation-delay: .2s; }
+  .kb-typing-dots span:nth-child(3) { animation-delay: .4s; }
+  @keyframes kb-bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-5px)} }
+
+  /* Input area */
+  .kb-input-area {
+    padding: .7rem .9rem;
+    border-top: 1px solid var(--border);
+    background: var(--bg); flex-shrink: 0;
+  }
+  .kb-input-row {
+    display: flex; gap: .5rem; align-items: flex-end;
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 10px; padding: .45rem .55rem .45rem .8rem;
+    transition: border-color .15s;
+  }
+  .kb-input-row:focus-within { border-color: var(--purple); }
+  #kb-input {
+    flex: 1; background: none; border: none; outline: none;
+    color: var(--text); font-family: var(--sans); font-size: .82rem;
+    resize: none; max-height: 90px; line-height: 1.55;
+  }
+  #kb-input::placeholder { color: var(--muted); font-size: .8rem; }
+  .kb-send {
+    width: 30px; height: 30px; border-radius: 7px; flex-shrink: 0;
+    background: linear-gradient(135deg,#6e40c9,#388bfd);
+    border: none; cursor: pointer; color: #fff; font-size: .75rem;
+    display: flex; align-items: center; justify-content: center;
+    transition: opacity .15s;
+  }
+  .kb-send:hover { opacity: .85; }
+  .kb-send:disabled { opacity: .35; cursor: not-allowed; }
+  .kb-hint {
+    font-size: .68rem; color: var(--muted); margin-top: .4rem; text-align: center;
+  }
+
+  /* Responsive */
+  @media (max-width: 480px) {
+    #kalibot-panel { width: calc(100vw - 2rem); right: 1rem; bottom: 5rem; }
+    #kalibot-fab   { right: 1rem; bottom: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── NAVBAR ─────────────────────────────────────────────── -->
+<nav>
+  <div class="nav-logo">
+    <div class="dot"></div>
+    VulnScan<span style="color:var(--accent2)">Lab</span>
+  </div>
+  <ul class="nav-links">
+    <li><a href="#inicio" class="active">Inicio</a></li>
+    <li><a href="#herramientas">Herramientas</a></li>
+    <li><a href="#como-funciona">¿Cómo funciona?</a></li>
+    <li><a href="#glosario">Glosario</a></li>
+    <li><a href="#etica">Ética <span class="badge-new">!</span></a></li>
+    <li><a href="#" onclick="openKaliBot();return false;" style="color:var(--purple)"><i class="fa-solid fa-robot" style="margin-right:.3rem"></i>KaliBot <span class="badge-new" style="background:rgba(188,140,255,.15);color:var(--purple);border-color:rgba(188,140,255,.3)">IA</span></a></li>
+  </ul>
+  <a href="#herramientas" class="nav-cta">Explorar herramientas →</a>
+</nav>
+
+<!-- ── HERO ───────────────────────────────────────────────── -->
+<div id="inicio" class="hero">
+  <div class="hero-badge">
+    <i class="fa-solid fa-shield-halved" style="font-size:.8rem"></i>
+    Recurso educativo · Uso ético · Código abierto
+  </div>
+  <h1>Detecta vulnerabilidades<br>en redes locales con<br><span>Kali Linux</span></h1>
+  <p>Aprende a usar las herramientas de ciberseguridad más importantes del sector: qué hacen, cómo funcionan y cuándo usarlas — todo en español, desde cero.</p>
+  <div class="hero-btns">
+    <a href="#herramientas" class="btn-primary"><i class="fa-solid fa-terminal"></i> Ver herramientas</a>
+    <a href="#" onclick="openKaliBot();return false;" class="btn-ghost" style="border-color:rgba(188,140,255,.4);color:var(--purple)"><i class="fa-solid fa-robot"></i> Preguntar al KaliBot</a>
+    <a href="#como-funciona" class="btn-ghost"><i class="fa-regular fa-circle-question"></i> ¿Cómo usar esta guía?</a>
+  </div>
+</div>
+
+<!-- ── TERMINAL DEMO ───────────────────────────────────────── -->
+<div class="terminal" style="max-width:680px;margin:0 auto 3.5rem;padding:0 2rem;" >
+<div style="max-width:680px;margin:0 auto;">
+<div class="terminal">
+  <div class="terminal-bar">
+    <div class="terminal-dot r"></div>
+    <div class="terminal-dot y"></div>
+    <div class="terminal-dot g"></div>
+    <span class="terminal-title">kali@vulnscanlab ~ — nmap demo</span>
+  </div>
+  <div class="terminal-body">
+    <div><span class="t-prompt">┌──(kali㉿vulnscanlab)-[~]</span></div>
+    <div><span class="t-prompt">└─$</span> <span class="t-cmd">nmap</span> <span class="t-flag">-sV -O -p 1-1000</span> <span class="t-highlight">192.168.1.0/24</span></div>
+    <div style="margin-top:.5rem"><span class="t-output">Starting Nmap 7.94 ( https://nmap.org )</span></div>
+    <div><span class="t-output">Nmap scan report for </span><span class="t-highlight">192.168.1.1</span></div>
+    <div><span class="t-output">Host is up (0.0023s latency).</span></div>
+    <div style="margin-top:.3rem"><span class="t-output">PORT     STATE  SERVICE    VERSION</span></div>
+    <div><span class="t-green">22/tcp</span>   <span class="t-output">open   ssh        OpenSSH 8.9p1</span></div>
+    <div><span class="t-green">80/tcp</span>   <span class="t-output">open   http       Apache 2.4.52</span></div>
+    <div><span class="t-red">443/tcp</span>  <span class="t-output">open   ssl/https  nginx 1.18</span></div>
+    <div><span class="t-output">OS: </span><span class="t-highlight">Linux 5.x (Ubuntu 22.04)</span></div>
+    <div style="margin-top:.5rem"><span class="t-output">Nmap done: 1 IP address scanned in 8.24s</span></div>
+    <div style="margin-top:.3rem"><span class="t-prompt">└─$</span> <span class="cursor"></span></div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- ── STATS ──────────────────────────────────────────────── -->
+<div class="stats" style="max-width:800px;margin:0 auto 5rem;padding:0 2rem;">
+<div style="max-width:800px;margin:0 auto;">
+<div class="stats">
+  <div class="stat"><div class="stat-num">15</div><div class="stat-label">Herramientas documentadas</div></div>
+  <div class="stat"><div class="stat-num">6</div><div class="stat-label">Categorías de análisis</div></div>
+  <div class="stat"><div class="stat-num">100%</div><div class="stat-label">Contenido en español</div></div>
+  <div class="stat"><div class="stat-num">Ético</div><div class="stat-label">Uso responsable y legal</div></div>
+</div>
+</div>
+</div>
+
+<!-- ── TOOLS GRID ─────────────────────────────────────────── -->
+<section id="herramientas" class="tools-section">
+  <div class="section-header">
+    <span class="section-tag">// herramientas</span>
+    <h2>Principales herramientas de Kali Linux</h2>
+    <p>Selecciona una herramienta para explorar su documentación, comandos y ejemplos de uso en redes locales.</p>
+  </div>
+
+  <div class="tools-filters">
+    <button class="filter-btn active" onclick="filterTools('todas', this)">Todas</button>
+    <button class="filter-btn" onclick="filterTools('reconocimiento', this)">Reconocimiento</button>
+    <button class="filter-btn" onclick="filterTools('trafico', this)">Tráfico de red</button>
+    <button class="filter-btn" onclick="filterTools('web', this)">Seguridad web</button>
+    <button class="filter-btn" onclick="filterTools('vulnerabilidades', this)">Vulnerabilidades</button>
+    <button class="filter-btn" onclick="filterTools('explotacion', this)">Explotación</button>
+    <button class="filter-btn" onclick="filterTools('wifi', this)">Wi-Fi</button>
+    <button class="filter-btn" onclick="filterTools('monitoreo', this)">Monitoreo</button>
+  </div>
+
+  <div class="tools-grid" id="toolsGrid">
+
+    <!-- Nmap -->
+    <div class="tool-card" data-cat="reconocimiento" onclick="showTool('nmap')">
+      <div class="tool-card-head">
+        <div class="tool-icon icon-recon"><i class="fa-solid fa-magnifying-glass"></i></div>
+        <span class="tool-category-badge cat-recon">Reconocimiento</span>
+      </div>
+      <h3>Nmap</h3>
+      <p>Escáner de red y puertos. Identifica hosts activos, servicios en ejecución y sistemas operativos dentro de una red local.</p>
+      <span class="tool-cmd">nmap -sV 192.168.1.0/24</span>
+    </div>
+
+    <!-- Netdiscover -->
+    <div class="tool-card" data-cat="reconocimiento" onclick="showTool('netdiscover')">
+      <div class="tool-card-head">
+        <div class="tool-icon icon-recon"><i class="fa-solid fa-network-wired"></i></div>
+        <span class="tool-category-badge cat-recon">Reconocimiento</span>
+      </div>
+      <h3>Netdiscover</h3>
+      <p>Descubre dispositivos activos en la red local utilizando peticiones ARP activas y pasivas.</p>
+      <span class="tool-cmd">netdiscover -r 192.168.1.0/24</span>
+    </div>
+
+    <!-- Wireshark -->
+    <div class="tool-card" data-cat="trafico" onclick="showTool('wireshark')">
+      <div class="tool-card-head">
+        <div class="tool-icon icon-traffic"><i class="fa-solid fa-wave-square"></i></div>
+        <span class="tool-category-badge cat-traffic">Tráfico de red</span>
+      </div>
+      <h3>Wireshark</h3>
+      <p>Captura y analiza paquetes de red en tiempo real. Permite inspeccionar protocolos, conexiones y datos transmitidos.</p>
+      <span class="tool-cmd">wireshark -i eth0</span>
+    </div>
+
+    <!-- Tcpdump -->
+    <div class="tool-card" data-cat="trafico" onclick="showTool('tcpdump')">
+      <div class="tool-card-head">
+        <div class="tool-icon icon-traffic"><i class="fa-solid fa-terminal"></i></div>
+        <span class="tool-category-badge cat-traffic">Tráfico de red</span>
+      </div>
+      <h3>Tcpdump</h3>
+      <p>Captura de tráfico de red desde la línea de comandos. Ideal para filtrar y guardar paquetes de forma automatizada.</p>
+      <span class="tool-cmd">tcpdump -i eth0 port 80</span>
+    </div>
+
+    <!-- Nikto -->
+    <div class="tool-card" data-cat="web" onclick="showTool('nikto')">
+      <div class="tool-card-head">
+        <div class="tool-icon icon-web"><i class="fa-solid fa-spider"></i></div>
+        <span class="tool-category-badge cat-web">Seguridad web</span>
+      </div>
+      <h3>Nikto</h3>
+      <p>Escáner de servidores web que detecta configuraciones inseguras, software desactualizado y rutas peligrosas.</p>
+      <span class="tool-cmd">nikto -h 192.168.1.10</span>
+    </div>
+
+    <!-- Burp Suite -->
+    <div class="tool-card" data-cat="web" onclick="showTool('burpsuite')">
+      <div class="tool-card-head">
+        <div class="tool-icon icon-web"><i class="fa-solid fa-bug"></i></div>
+        <span class="tool-category-badge cat-web">Seguridad web</span>
+      </div>
+      <h3>Burp Suite</h3>
+      <p>Proxy de interceptación para analizar y manipular peticiones HTTP/HTTPS. Herramienta clave en auditorías web.</p>
+      <span class="tool-cmd">burpsuite &amp;</span>
+    </div>
+
+    <!-- OpenVAS -->
+    <div class="tool-card" data-cat="vulnerabilidades" onclick="showTool('openvas')">
+      <div class="tool-card-head">
+        <div class="tool-icon icon-vuln"><i class="fa-solid fa-shield-virus"></i></div>
+        <span class="tool-category-badge cat-vuln">Vulnerabilidades</span>
+      </div>
+      <h3>OpenVAS / GVM</h3>
+      <p>Sistema integral de gestión y evaluación de vulnerabilidades con base de datos de CVEs actualizada automáticamente.</p>
+      <span class="tool-cmd">gvm-start</span>
+    </div>
+
+    <!-- Metasploit -->
+    <div class="tool-card" data-cat="explotacion" onclick="showTool('metasploit')">
+      <div class="tool-card-head">
+        <div class="tool-icon icon-exploit"><i class="fa-solid fa-bomb"></i></div>
+        <span class="tool-category-badge cat-exploit">Explotación</span>
+      </div>
+      <h3>Metasploit</h3>
+      <p>Framework de explotación de vulnerabilidades conocidas. Organizado en módulos: exploits, payloads y auxiliares.</p>
+      <span class="tool-cmd">msfconsole</span>
+    </div>
+
+    <!-- Sqlmap -->
+    <div class="tool-card" data-cat="web explotacion" onclick="showTool('sqlmap')">
+      <div class="tool-card-head">
+        <div class="tool-icon icon-exploit"><i class="fa-solid fa-database"></i></div>
+        <span class="tool-category-badge cat-exploit">Explotación</span>
+      </div>
+      <h3>Sqlmap</h3>
+      <p>Detección y explotación automática de inyecciones SQL en aplicaciones web. Soporta múltiples bases de datos.</p>
+      <span class="tool-cmd">sqlmap -u "http://target/id=1"</span>
+    </div>
+
+    <!-- Hydra -->
+    <div class="tool-card" data-cat="explotacion" onclick="showTool('hydra')">
+      <div class="tool-card-head">
+        <div class="tool-icon icon-exploit"><i class="fa-solid fa-key"></i></div>
+        <span class="tool-category-badge cat-exploit">Explotación</span>
+      </div>
+      <h3>Hydra</h3>
+      <p>Herramienta de fuerza bruta para servicios de red: SSH, FTP, HTTP, SMB. Evalúa la robustez de contraseñas.</p>
+      <span class="tool-cmd">hydra -l admin -P wordlist.txt ssh://192.168.1.1</span>
+    </div>
+
+    <!-- Aircrack-ng -->
+    <div class="tool-card" data-cat="wifi" onclick="showTool('aircrack')">
+      <div class="tool-card-head">
+        <div class="tool-icon icon-wifi"><i class="fa-solid fa-wifi"></i></div>
+        <span class="tool-category-badge cat-wifi">Wi-Fi</span>
+      </div>
+      <h3>Aircrack-ng</h3>
+      <p>Suite para auditoría de redes inalámbricas: captura de handshakes WPA, análisis de paquetes y evaluación de seguridad Wi-Fi.</p>
+      <span class="tool-cmd">airodump-ng wlan0mon</span>
+    </div>
+
+    <!-- Netcat -->
+    <div class="tool-card" data-cat="reconocimiento explotacion" onclick="showTool('netcat')">
+      <div class="tool-card-head">
+        <div class="tool-icon icon-recon"><i class="fa-solid fa-plug"></i></div>
+        <span class="tool-category-badge cat-recon">Redes</span>
+      </div>
+      <h3>Netcat</h3>
+      <p>La "navaja suiza" de las redes. Transferencia de datos, diagnóstico de puertos y conexiones TCP/UDP desde terminal.</p>
+      <span class="tool-cmd">nc -lvnp 4444</span>
+    </div>
+
+    <!-- Grafana -->
+    <div class="tool-card" data-cat="monitoreo" onclick="showTool('grafana')">
+      <div class="tool-card-head">
+        <div class="tool-icon icon-monitor"><i class="fa-solid fa-chart-line"></i></div>
+        <span class="tool-category-badge cat-monitor">Monitoreo</span>
+      </div>
+      <h3>Grafana</h3>
+      <p>Plataforma de visualización y análisis de métricas. Permite crear dashboards en tiempo real para monitorear el comportamiento de la red y detectar anomalías de seguridad.</p>
+      <span class="tool-cmd">grafana-server start</span>
+    </div>
+
+    <!-- Zabbix -->
+    <div class="tool-card" data-cat="monitoreo" onclick="showTool('zabbix')">
+      <div class="tool-card-head">
+        <div class="tool-icon icon-monitor"><i class="fa-solid fa-tower-broadcast"></i></div>
+        <span class="tool-category-badge cat-monitor">Monitoreo</span>
+      </div>
+      <h3>Zabbix</h3>
+      <p>Sistema de monitoreo de red empresarial de código abierto. Supervisa disponibilidad, rendimiento y seguridad de hosts, servicios y dispositivos de red en tiempo real.</p>
+      <span class="tool-cmd">zabbix_server -c /etc/zabbix/zabbix_server.conf</span>
+    </div>
+
+    <!-- Deephat -->
+    <div class="tool-card" data-cat="vulnerabilidades explotacion" onclick="showTool('deephat')">
+      <div class="tool-card-head">
+        <div class="tool-icon icon-exploit"><i class="fa-solid fa-hat-wizard"></i></div>
+        <span class="tool-category-badge cat-exploit">Explotación</span>
+      </div>
+      <h3>Deephat</h3>
+      <p>Herramienta de análisis de vulnerabilidades orientada a la identificación de vectores de ataque mediante técnicas de enumeración profunda en redes locales.</p>
+      <span class="tool-cmd">deephat --scan --target 192.168.1.0/24</span>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── MODAL ──────────────────────────────────────────────── -->
+<div id="modal" style="display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:1rem">
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:16px;width:100%;max-width:680px;max-height:85vh;overflow-y:auto;">
+    <div style="padding:1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+      <h3 id="modal-title" style="font-size:1.1rem;font-weight:600;"></h3>
+      <button onclick="closeModal()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.2rem;">×</button>
+    </div>
+    <div id="modal-body" style="padding:1.5rem;"></div>
+  </div>
+</div>
+
+<!-- ── HOW IT WORKS ────────────────────────────────────────── -->
+<section id="como-funciona" class="how-section">
+  <div class="section-header">
+    <span class="section-tag">// metodología</span>
+    <h2>¿Cómo se realiza una auditoría de red?</h2>
+    <p>El proceso de detección de vulnerabilidades sigue fases definidas. Cada herramienta cumple un rol específico.</p>
+  </div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">01</div>
+      <h3>Reconocimiento</h3>
+      <p>Identificar qué dispositivos, puertos y servicios están activos en la red. Herramientas: <span style="color:var(--accent2)">Nmap</span>, <span style="color:var(--accent2)">Netdiscover</span>.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">02</div>
+      <h3>Captura de tráfico</h3>
+      <p>Analizar los datos que circulan por la red para detectar comunicaciones inseguras. Herramientas: <span style="color:var(--green)">Wireshark</span>, <span style="color:var(--green)">Tcpdump</span>.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">03</div>
+      <h3>Análisis de vulnerabilidades</h3>
+      <p>Identificar debilidades en servicios y aplicaciones web. Herramientas: <span style="color:var(--purple)">Nikto</span>, <span style="color:var(--orange)">OpenVAS</span>.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">04</div>
+      <h3>Reporte de hallazgos</h3>
+      <p>Documentar cada vulnerabilidad encontrada con su nivel de riesgo y recomendaciones de mitigación.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── GLOSSARY ────────────────────────────────────────────── -->
+<section id="glosario" class="glossary-section">
+  <div class="section-header">
+    <span class="section-tag">// glosario</span>
+    <h2>Términos clave</h2>
+    <p>Conceptos esenciales para entender la seguridad en redes locales.</p>
+  </div>
+  <div class="glossary-grid">
+    <div class="glossary-item">
+      <div class="glossary-term">CVE</div>
+      <div class="glossary-def">Common Vulnerabilities and Exposures. Identificador único para vulnerabilidades de seguridad públicamente conocidas.</div>
+    </div>
+    <div class="glossary-item">
+      <div class="glossary-term">Puerto (Port)</div>
+      <div class="glossary-def">Número lógico (0-65535) que identifica un servicio de red en un dispositivo. Ej: puerto 80 = HTTP.</div>
+    </div>
+    <div class="glossary-item">
+      <div class="glossary-term">Penetration Testing</div>
+      <div class="glossary-def">Prueba de penetración autorizada: simulación de ataques para identificar vulnerabilidades antes que los atacantes.</div>
+    </div>
+    <div class="glossary-item">
+      <div class="glossary-term">Payload</div>
+      <div class="glossary-def">Código que se ejecuta en el sistema objetivo durante una explotación. Puede ser una shell reversa, un agente, etc.</div>
+    </div>
+    <div class="glossary-item">
+      <div class="glossary-term">Sniffing</div>
+      <div class="glossary-def">Captura y análisis del tráfico de red para inspeccionar los datos que viajan entre dispositivos.</div>
+    </div>
+    <div class="glossary-item">
+      <div class="glossary-term">ARP</div>
+      <div class="glossary-def">Address Resolution Protocol. Protocolo que asocia direcciones IP con direcciones MAC en una red local.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ETHICS ─────────────────────────────────────────────── -->
+<section id="etica" class="ethics-section">
+  <div class="section-header">
+    <span class="section-tag">// ética y legalidad</span>
+    <h2>Uso responsable del conocimiento</h2>
+    <p>La ciberseguridad ética tiene reglas claras que todo profesional debe conocer.</p>
+  </div>
+  <div class="ethics-card">
+    <div class="ethics-icon"><i class="fa-solid fa-scale-balanced"></i></div>
+    <div>
+      <h3>¿Qué es el Hacking Ético?</h3>
+      <p>El hacking ético consiste en utilizar las mismas técnicas y herramientas que un atacante malicioso, pero con <strong>autorización expresa</strong> del propietario del sistema y con el objetivo de mejorar su seguridad. En Colombia, la <strong>Ley 1273 de 2009</strong> tipifica como delito el acceso no autorizado a sistemas informáticos. Usar estas herramientas sin permiso puede tener consecuencias legales graves.</p>
+      <div class="ethics-pills">
+        <span class="pill">✓ Solo en redes propias</span>
+        <span class="pill">✓ Con autorización escrita</span>
+        <span class="pill">✓ Fines educativos</span>
+        <span class="pill">✓ Ley 1273/2009</span>
+        <span class="pill">✓ Hacking ético</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA ────────────────────────────────────────────────── -->
+<section class="cta-section">
+  <div class="cta-box">
+    <h2>¿Listo para aprender?</h2>
+    <p>Explora cada herramienta en detalle: cómo funciona, sus comandos principales y ejemplos reales de uso en redes locales.</p>
+    <a href="#herramientas" class="btn-primary" style="font-size:.9rem;padding:.7rem 1.6rem;display:inline-flex;">
+      <i class="fa-solid fa-terminal"></i> Ver todas las herramientas
+    </a>
+  </div>
+</section>
+
+<!-- ── FOOTER ─────────────────────────────────────────────── -->
+<footer>
+  <span class="footer-logo">VulnScan<span style="color:var(--accent2)">Lab</span></span>
+  <div class="footer-links">
+    <a href="#herramientas">Herramientas</a>
+    <a href="#glosario">Glosario</a>
+    <a href="#etica">Ética</a>
+    <a href="#como-funciona">Metodología</a>
+  </div>
+  <span>Proyecto educativo · Uso ético · 2026</span>
+</footer>
+
+<!-- ── WIP BADGE ─────────────────────────────────────────── -->
+<div class="wip-banner">
+  <div class="wip-dot"></div>
+  Cuarto avance · KaliBot IA integrado
+</div>
+
+<!-- ── SCRIPTS ────────────────────────────────────────────── -->
+<script>
+const toolData = {
+  nmap: {
+    title: 'Nmap — Network Mapper',
+    body: `
+      <!-- MINI AVANCE COMPLETO: NMAP -->
+      <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1.25rem">
+        <div style="width:44px;height:44px;border-radius:12px;background:rgba(56,139,253,.12);color:#58a6ff;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0"><i class="fa-solid fa-magnifying-glass"></i></div>
+        <div>
+          <div style="font-size:.7rem;font-family:var(--mono);color:#58a6ff;margin-bottom:.2rem">RECONOCIMIENTO · KALI LINUX</div>
+          <div style="font-size:.82rem;color:var(--muted)">Gordon Lyon · Licencia NPSL · kali.org/tools/nmap</div>
+        </div>
+      </div>
+
+      <h4 style="font-size:.82rem;color:var(--accent2);font-family:var(--mono);margin-bottom:.6rem">// ¿Qué es?</h4>
+      <p style="color:var(--muted);font-size:.87rem;line-height:1.85;margin-bottom:1.25rem">
+        <strong style="color:var(--text)">Nmap</strong> (Network Mapper) es el escáner de redes de código abierto más utilizado en el mundo de la ciberseguridad. Fue creado en 1997 por Gordon Lyon y hoy es una herramienta fundamental en cualquier auditoría de red. Permite descubrir qué dispositivos están activos en una red, qué puertos tienen abiertos, qué servicios están corriendo, qué versiones tienen esos servicios y qué sistema operativo usa cada host.
+      </p>
+
+      <h4 style="font-size:.82rem;color:var(--accent2);font-family:var(--mono);margin-bottom:.6rem">// ¿Para qué sirve en redes locales?</h4>
+      <p style="color:var(--muted);font-size:.87rem;line-height:1.85;margin-bottom:1rem">
+        En una red local (LAN), Nmap es el primer paso de cualquier auditoría de seguridad. Antes de buscar vulnerabilidades, necesitas saber <em>qué hay en la red</em>. Nmap responde exactamente esa pregunta: mapea la topología completa de la red, revelando todos los dispositivos conectados y los servicios que exponen.
+      </p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:1.25rem">
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem">
+          <div style="color:#58a6ff;font-weight:600;margin-bottom:.3rem">✦ Inventario de red</div>
+          <div style="color:var(--muted);line-height:1.6">Descubrir todos los dispositivos conectados: PCs, impresoras, routers, cámaras, IoT.</div>
+        </div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem">
+          <div style="color:#58a6ff;font-weight:600;margin-bottom:.3rem">✦ Auditoría de puertos</div>
+          <div style="color:var(--muted);line-height:1.6">Verificar qué puertos están abiertos innecesariamente y representan un riesgo.</div>
+        </div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem">
+          <div style="color:#58a6ff;font-weight:600;margin-bottom:.3rem">✦ Detección de versiones</div>
+          <div style="color:var(--muted);line-height:1.6">Identificar servicios desactualizados con versiones vulnerables conocidas (CVEs).</div>
+        </div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem">
+          <div style="color:#58a6ff;font-weight:600;margin-bottom:.3rem">✦ OS fingerprinting</div>
+          <div style="color:var(--muted);line-height:1.6">Determinar el sistema operativo de cada dispositivo para identificar parches faltantes.</div>
+        </div>
+      </div>
+
+      <h4 style="font-size:.82rem;color:var(--accent2);font-family:var(--mono);margin-bottom:.6rem">// ¿Cómo funciona?</h4>
+      <p style="color:var(--muted);font-size:.87rem;line-height:1.85;margin-bottom:1.25rem">
+        Nmap envía paquetes de red especialmente construidos a los hosts objetivo y analiza las respuestas. Dependiendo del tipo de escaneo, puede usar paquetes TCP SYN, UDP, ICMP o combinaciones de ellos. El <strong style="color:var(--text)">SYN scan</strong> (el más común) envía un paquete SYN y si recibe SYN-ACK sabe que el puerto está abierto, sin completar la conexión TCP (sigiloso). El análisis de respuestas a paquetes con flags especiales permite a Nmap "adivinar" el sistema operativo comparando el comportamiento con una base de datos de huellas digitales.
+      </p>
+
+      <h4 style="font-size:.82rem;color:var(--accent2);font-family:var(--mono);margin-bottom:.6rem">// Comandos principales</h4>
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:1rem 1.25rem;font-family:var(--mono);font-size:.77rem;line-height:2.1;margin-bottom:1.25rem">
+        <div><span style="color:var(--muted)"># Descubrir todos los hosts activos en la red</span></div>
+        <div style="margin-bottom:.4rem"><span style="color:var(--green)">nmap -sn 192.168.1.0/24</span></div>
+        <div><span style="color:var(--muted)"># Escaneo básico de puertos y versiones</span></div>
+        <div style="margin-bottom:.4rem"><span style="color:var(--green)">nmap -sV 192.168.1.1</span></div>
+        <div><span style="color:var(--muted)"># Escaneo SYN silencioso + OS + versiones (requiere root)</span></div>
+        <div style="margin-bottom:.4rem"><span style="color:var(--green)">sudo nmap -sS -O -sV 192.168.1.1</span></div>
+        <div><span style="color:var(--muted)"># Escaneo completo: todos los puertos + scripts de detección</span></div>
+        <div style="margin-bottom:.4rem"><span style="color:var(--green)">sudo nmap -sC -sV -p- 192.168.1.1</span></div>
+        <div><span style="color:var(--muted)"># Escaneo rápido de los 100 puertos más comunes</span></div>
+        <div style="margin-bottom:.4rem"><span style="color:var(--green)">nmap -F 192.168.1.0/24</span></div>
+        <div><span style="color:var(--muted)"># Guardar resultados en archivo</span></div>
+        <div><span style="color:var(--green)">nmap -oN resultado.txt 192.168.1.0/24</span></div>
+      </div>
+
+      <h4 style="font-size:.82rem;color:var(--accent2);font-family:var(--mono);margin-bottom:.6rem">// Ejemplo de salida real</h4>
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:1rem 1.25rem;font-family:var(--mono);font-size:.76rem;line-height:1.9;margin-bottom:1.25rem">
+        <div style="color:var(--muted)">Nmap scan report for <span style="color:#58a6ff">192.168.1.105</span></div>
+        <div style="color:var(--muted)">Host is up <span style="color:var(--green)">(0.0018s latency)</span>.</div>
+        <div style="color:var(--muted);margin-top:.4rem">PORT      STATE  SERVICE    VERSION</div>
+        <div><span style="color:var(--green)">22/tcp  </span> <span style="color:var(--muted)">open   ssh        </span><span style="color:#58a6ff">OpenSSH 7.9p1 Debian</span></div>
+        <div><span style="color:var(--green)">80/tcp  </span> <span style="color:var(--muted)">open   http       </span><span style="color:#58a6ff">Apache httpd 2.4.38</span></div>
+        <div><span style="color:#f85149)">3306/tcp</span> <span style="color:var(--muted)">open   mysql      </span><span style="color:#f85149">MySQL 5.7.33</span> <span style="color:var(--orange)">⚠ versión con CVEs</span></div>
+        <div style="color:var(--muted);margin-top:.4rem">OS: <span style="color:#58a6ff">Linux 4.x (Debian 10)</span></div>
+      </div>
+      <p style="font-size:.8rem;color:var(--muted);line-height:1.7;margin-bottom:1.25rem">
+        En este ejemplo, Nmap detectó que el puerto <strong style="color:var(--text)">3306</strong> (MySQL) está expuesto con la versión 5.7.33, que tiene vulnerabilidades críticas conocidas. Esta información permite al auditor priorizar la corrección de ese servicio.
+      </p>
+
+      <h4 style="font-size:.82rem;color:var(--accent2);font-family:var(--mono);margin-bottom:.6rem">// Tipos de escaneo</h4>
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:1.25rem">
+        <table style="width:100%;font-size:.78rem;border-collapse:collapse">
+          <thead><tr style="background:var(--bg3)">
+            <th style="padding:.6rem .9rem;text-align:left;color:var(--muted);font-weight:500;border-bottom:1px solid var(--border)">Flag</th>
+            <th style="padding:.6rem .9rem;text-align:left;color:var(--muted);font-weight:500;border-bottom:1px solid var(--border)">Tipo</th>
+            <th style="padding:.6rem .9rem;text-align:left;color:var(--muted);font-weight:500;border-bottom:1px solid var(--border)">Descripción</th>
+          </tr></thead>
+          <tbody>
+            <tr style="border-bottom:1px solid var(--border2)"><td style="padding:.55rem .9rem;font-family:var(--mono);color:var(--green)">-sS</td><td style="padding:.55rem .9rem;color:var(--text)">SYN scan</td><td style="padding:.55rem .9rem;color:var(--muted)">Sigiloso, no completa la conexión TCP</td></tr>
+            <tr style="border-bottom:1px solid var(--border2)"><td style="padding:.55rem .9rem;font-family:var(--mono);color:var(--green)">-sT</td><td style="padding:.55rem .9rem;color:var(--text)">TCP Connect</td><td style="padding:.55rem .9rem;color:var(--muted)">Conexión completa, más detectable</td></tr>
+            <tr style="border-bottom:1px solid var(--border2)"><td style="padding:.55rem .9rem;font-family:var(--mono);color:var(--green)">-sU</td><td style="padding:.55rem .9rem;color:var(--text)">UDP scan</td><td style="padding:.55rem .9rem;color:var(--muted)">Escanea puertos UDP (DNS, SNMP, DHCP)</td></tr>
+            <tr style="border-bottom:1px solid var(--border2)"><td style="padding:.55rem .9rem;font-family:var(--mono);color:var(--green)">-sn</td><td style="padding:.55rem .9rem;color:var(--text)">Ping scan</td><td style="padding:.55rem .9rem;color:var(--muted)">Solo descubre hosts, no escanea puertos</td></tr>
+            <tr><td style="padding:.55rem .9rem;font-family:var(--mono);color:var(--green)">-sC</td><td style="padding:.55rem .9rem;color:var(--text)">Script scan</td><td style="padding:.55rem .9rem;color:var(--muted)">Ejecuta scripts NSE por defecto</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="background:rgba(56,139,253,.08);border:1px solid rgba(56,139,253,.2);border-left:3px solid #58a6ff;border-radius:8px;padding:.9rem 1rem;margin-bottom:.75rem;font-size:.83rem;color:var(--muted)">
+        <strong style="color:#58a6ff">ℹ Caso de uso real:</strong> Un administrador de red ejecuta Nmap mensualmente en la LAN corporativa para verificar que no aparezcan nuevos dispositivos no autorizados ni puertos abiertos no esperados. Es el equivalente digital de un inventario físico.
+      </div>
+      <div style="background:rgba(248,81,73,.08);border:1px solid rgba(248,81,73,.2);border-left:3px solid #f85149;border-radius:8px;padding:.9rem 1rem;font-size:.83rem;color:var(--muted)">
+        <strong style="color:#f85149">⚠ Uso ético:</strong> Escanear redes ajenas sin autorización es ilegal en Colombia bajo la Ley 1273 de 2009. Nmap debe usarse únicamente en redes propias o con permiso escrito del propietario.
+      </div>
+    `
+  },
+  wireshark: {
+    title: 'Wireshark — Analizador de Paquetes',
+    body: `
+      <p style="color:var(--muted);font-size:.88rem;line-height:1.8;margin-bottom:1.25rem">
+        <strong style="color:var(--text)">Wireshark</strong> es un analizador de protocolos de red con interfaz gráfica. Captura todo el tráfico que pasa por una interfaz de red y lo presenta de forma organizada, permitiendo inspeccionar cada paquete a nivel de byte.
+      </p>
+      <h4 style="font-size:.85rem;color:var(--green);font-family:var(--mono);margin-bottom:.75rem">// Filtros comunes</h4>
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:1rem;font-family:var(--mono);font-size:.78rem;line-height:2">
+        <div><span style="color:var(--green)">http</span>              <span style="color:var(--muted)"># Solo tráfico HTTP</span></div>
+        <div><span style="color:var(--green)">ip.addr == 192.168.1.1</span> <span style="color:var(--muted)"># Tráfico de/hacia una IP</span></div>
+        <div><span style="color:var(--green)">tcp.port == 443</span>   <span style="color:var(--muted)"># Solo puerto HTTPS</span></div>
+        <div><span style="color:var(--green)">dns</span>               <span style="color:var(--muted)"># Consultas DNS</span></div>
+      </div>
+      <div style="background:rgba(63,185,80,.08);border:1px solid rgba(63,185,80,.2);border-left:3px solid var(--green);border-radius:8px;padding:.9rem 1rem;margin-top:1.25rem;font-size:.82rem;color:var(--muted)">
+        <strong style="color:var(--green)">ℹ Caso de uso:</strong> Detectar credenciales transmitidas en texto plano (HTTP sin cifrar), identificar dispositivos que hacen peticiones inusuales o analizar la latencia de una aplicación.
+      </div>
+    `
+  },
+  metasploit: {
+    title: 'Metasploit Framework',
+    body: `
+      <p style="color:var(--muted);font-size:.88rem;line-height:1.8;margin-bottom:1.25rem">
+        <strong style="color:var(--text)">Metasploit</strong> es el framework de pruebas de penetración más completo del mundo. Organiza exploits, payloads y módulos auxiliares para demostrar el impacto real de vulnerabilidades conocidas en entornos controlados.
+      </p>
+      <h4 style="font-size:.85rem;color:var(--red);font-family:var(--mono);margin-bottom:.75rem">// Comandos esenciales</h4>
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:1rem;font-family:var(--mono);font-size:.78rem;line-height:2">
+        <div><span style="color:var(--green)">msfconsole</span>                  <span style="color:var(--muted)"># Iniciar la consola</span></div>
+        <div><span style="color:var(--green)">search eternalblue</span>           <span style="color:var(--muted)"># Buscar exploits</span></div>
+        <div><span style="color:var(--green)">use exploit/windows/smb/ms17_010</span> <span style="color:var(--muted)"># Seleccionar exploit</span></div>
+        <div><span style="color:var(--green)">set RHOSTS 192.168.1.10</span>     <span style="color:var(--muted)"># Definir objetivo</span></div>
+        <div><span style="color:var(--green)">show options</span>                 <span style="color:var(--muted)"># Ver configuración</span></div>
+      </div>
+      <div style="background:rgba(248,81,73,.08);border:1px solid rgba(248,81,73,.2);border-left:3px solid var(--red);border-radius:8px;padding:.9rem 1rem;margin-top:1.25rem;font-size:.82rem;color:var(--muted)">
+        <strong style="color:var(--red)">⚠ Importante:</strong> Metasploit solo debe usarse en sistemas propios o con autorización expresa. Su uso no autorizado es ilegal según la Ley 1273 de 2009.
+      </div>
+    `
+  },
+  grafana: {
+    title: 'Grafana — Visualización y Monitoreo',
+    body: `
+      <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1.25rem">
+        <div style="width:44px;height:44px;border-radius:12px;background:rgba(56,189,248,.12);color:#38bdf8;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0"><i class="fa-solid fa-chart-line"></i></div>
+        <div>
+          <div style="font-size:.7rem;font-family:var(--mono);color:#38bdf8;margin-bottom:.2rem">MONITOREO · VISUALIZACIÓN · CÓDIGO ABIERTO</div>
+          <div style="font-size:.82rem;color:var(--muted)">Grafana Labs · Licencia AGPL-3.0 · grafana.com</div>
+        </div>
+      </div>
+
+      <h4 style="font-size:.82rem;color:#38bdf8;font-family:var(--mono);margin-bottom:.6rem">// ¿Qué es?</h4>
+      <p style="color:var(--muted);font-size:.87rem;line-height:1.85;margin-bottom:1.25rem">
+        <strong style="color:var(--text)">Grafana</strong> es una plataforma de código abierto para la visualización y análisis de métricas, logs y trazas. Permite crear dashboards interactivos en tiempo real que transforman datos crudos de red en gráficas comprensibles. En el contexto de ciberseguridad, se usa para visualizar el tráfico de red, detectar picos anómalos, correlacionar eventos de seguridad y monitorear el estado de los servicios de forma continua.
+      </p>
+
+      <h4 style="font-size:.82rem;color:#38bdf8;font-family:var(--mono);margin-bottom:.6rem">// ¿Para qué sirve en seguridad de redes?</h4>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:1.25rem">
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem">
+          <div style="color:#38bdf8;font-weight:600;margin-bottom:.3rem">✦ Detección de anomalías</div>
+          <div style="color:var(--muted);line-height:1.6">Visualizar picos de tráfico, conexiones inusuales o comportamientos fuera de lo normal.</div>
+        </div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem">
+          <div style="color:#38bdf8;font-weight:600;margin-bottom:.3rem">✦ Dashboards de seguridad</div>
+          <div style="color:var(--muted);line-height:1.6">Centralizar métricas de múltiples herramientas (Zabbix, Prometheus, logs del sistema) en una sola vista.</div>
+        </div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem">
+          <div style="color:#38bdf8;font-weight:600;margin-bottom:.3rem">✦ Alertas automáticas</div>
+          <div style="color:var(--muted);line-height:1.6">Configurar alertas que notifican cuando un umbral se supera (ej: más de 1000 conexiones/min).</div>
+        </div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem">
+          <div style="color:#38bdf8;font-weight:600;margin-bottom:.3rem">✦ Histórico de eventos</div>
+          <div style="color:var(--muted);line-height:1.6">Analizar el comportamiento de la red en el tiempo para identificar patrones de ataque.</div>
+        </div>
+      </div>
+
+      <h4 style="font-size:.82rem;color:#38bdf8;font-family:var(--mono);margin-bottom:.6rem">// Comandos de instalación y uso</h4>
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:1rem 1.25rem;font-family:var(--mono);font-size:.77rem;line-height:2.1;margin-bottom:1.25rem">
+        <div><span style="color:var(--muted)"># Iniciar el servidor de Grafana</span></div>
+        <div style="margin-bottom:.4rem"><span style="color:var(--green)">sudo systemctl start grafana-server</span></div>
+        <div><span style="color:var(--muted)"># Activar al inicio del sistema</span></div>
+        <div style="margin-bottom:.4rem"><span style="color:var(--green)">sudo systemctl enable grafana-server</span></div>
+        <div><span style="color:var(--muted)"># Acceder desde el navegador (puerto por defecto)</span></div>
+        <div style="margin-bottom:.4rem"><span style="color:var(--green)">http://localhost:3000</span>  <span style="color:var(--muted)"># admin / admin</span></div>
+        <div><span style="color:var(--muted)"># Ver estado del servicio</span></div>
+        <div><span style="color:var(--green)">sudo systemctl status grafana-server</span></div>
+      </div>
+
+      <div style="background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.2);border-left:3px solid #38bdf8;border-radius:8px;padding:.9rem 1rem;font-size:.83rem;color:var(--muted)">
+        <strong style="color:#38bdf8">ℹ Nota importante:</strong> Grafana no es una herramienta de ataque — es una herramienta de <em>monitoreo defensivo</em>. Se integra con fuentes de datos como Prometheus, InfluxDB, Elasticsearch o directamente con Zabbix para mostrar el estado de la red en tiempo real.
+      </div>
+    `
+  },
+  zabbix: {
+    title: 'Zabbix — Monitoreo de Red Empresarial',
+    body: `
+      <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1.25rem">
+        <div style="width:44px;height:44px;border-radius:12px;background:rgba(56,189,248,.12);color:#38bdf8;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0"><i class="fa-solid fa-tower-broadcast"></i></div>
+        <div>
+          <div style="font-size:.7rem;font-family:var(--mono);color:#38bdf8;margin-bottom:.2rem">MONITOREO · REDES · CÓDIGO ABIERTO</div>
+          <div style="font-size:.82rem;color:var(--muted)">Zabbix LLC · Licencia GPL-2.0 · zabbix.com</div>
+        </div>
+      </div>
+
+      <h4 style="font-size:.82rem;color:#38bdf8;font-family:var(--mono);margin-bottom:.6rem">// ¿Qué es?</h4>
+      <p style="color:var(--muted);font-size:.87rem;line-height:1.85;margin-bottom:1.25rem">
+        <strong style="color:var(--text)">Zabbix</strong> es una plataforma de monitoreo de red y sistemas de código abierto, diseñada para supervisar la disponibilidad, el rendimiento y la seguridad de infraestructuras de TI. Puede monitorear servidores, dispositivos de red (routers, switches), máquinas virtuales y aplicaciones, enviando alertas cuando algo sale de los parámetros normales. Es muy usado en entornos empresariales para detectar fallos y comportamientos sospechosos antes de que se conviertan en incidentes de seguridad.
+      </p>
+
+      <h4 style="font-size:.82rem;color:#38bdf8;font-family:var(--mono);margin-bottom:.6rem">// ¿Cómo ayuda en la detección de vulnerabilidades?</h4>
+      <p style="color:var(--muted);font-size:.87rem;line-height:1.85;margin-bottom:1.25rem">
+        Zabbix monitorea en tiempo real métricas como el uso de CPU, tráfico de red, intentos de login fallidos, disponibilidad de servicios y cambios en la configuración. Al configurar <strong style="color:var(--text)">umbrales y disparadores (triggers)</strong>, el sistema notifica automáticamente cuando detecta algo anormal — por ejemplo, un número inusualmente alto de conexiones que podría indicar un escaneo de puertos o un ataque de fuerza bruta.
+      </p>
+
+      <h4 style="font-size:.82rem;color:#38bdf8;font-family:var(--mono);margin-bottom:.6rem">// Comandos principales</h4>
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:1rem 1.25rem;font-family:var(--mono);font-size:.77rem;line-height:2.1;margin-bottom:1.25rem">
+        <div><span style="color:var(--muted)"># Iniciar el servidor Zabbix</span></div>
+        <div style="margin-bottom:.4rem"><span style="color:var(--green)">sudo systemctl start zabbix-server</span></div>
+        <div><span style="color:var(--muted)"># Iniciar el agente en un host monitoreado</span></div>
+        <div style="margin-bottom:.4rem"><span style="color:var(--green)">sudo systemctl start zabbix-agent</span></div>
+        <div><span style="color:var(--muted)"># Ver logs del servidor</span></div>
+        <div style="margin-bottom:.4rem"><span style="color:var(--green)">tail -f /var/log/zabbix/zabbix_server.log</span></div>
+        <div><span style="color:var(--muted)"># Acceder a la interfaz web</span></div>
+        <div><span style="color:var(--green)">http://localhost/zabbix</span>  <span style="color:var(--muted)"># Admin / zabbix</span></div>
+      </div>
+
+      <div style="background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.2);border-left:3px solid #38bdf8;border-radius:8px;padding:.9rem 1rem;font-size:.83rem;color:var(--muted)">
+        <strong style="color:#38bdf8">ℹ Relación con Grafana:</strong> Zabbix puede integrarse con Grafana como fuente de datos, lo que permite crear dashboards visuales más elaborados con los datos de monitoreo que recopila Zabbix. Son herramientas complementarias muy usadas juntas en entornos de seguridad.
+      </div>
+    `
+  },
+  deephat: {
+    title: 'Deephat — Enumeración y Análisis Profundo',
+    body: `
+      <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1.25rem">
+        <div style="width:44px;height:44px;border-radius:12px;background:rgba(248,81,73,.12);color:#f85149;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0"><i class="fa-solid fa-hat-wizard"></i></div>
+        <div>
+          <div style="font-size:.7rem;font-family:var(--mono);color:#f85149;margin-bottom:.2rem">ENUMERACIÓN · VULNERABILIDADES · KALI LINUX</div>
+          <div style="font-size:.82rem;color:var(--muted)">Herramienta de análisis profundo de vectores de ataque</div>
+        </div>
+      </div>
+
+      <div style="background:rgba(210,153,34,.08);border:1px solid rgba(210,153,34,.25);border-left:3px solid var(--orange);border-radius:8px;padding:.9rem 1rem;margin-bottom:1.25rem;font-size:.83rem;color:var(--muted)">
+        <strong style="color:var(--orange)">📌 Nota del equipo:</strong> Estamos verificando la documentación oficial de esta herramienta para presentar información precisa. El contenido detallado estará disponible en el siguiente avance del proyecto.
+      </div>
+
+      <h4 style="font-size:.82rem;color:var(--red);font-family:var(--mono);margin-bottom:.6rem">// ¿Qué es?</h4>
+      <p style="color:var(--muted);font-size:.87rem;line-height:1.85;margin-bottom:1.25rem">
+        <strong style="color:var(--text)">Deephat</strong> es una herramienta orientada a la enumeración profunda y el análisis de vectores de ataque en redes locales. A diferencia de escáneres generales como Nmap, Deephat se especializa en profundizar en los servicios encontrados, identificando configuraciones inseguras, credenciales por defecto, rutas expuestas y posibles puntos de entrada para un atacante.
+      </p>
+
+      <h4 style="font-size:.82rem;color:var(--red);font-family:var(--mono);margin-bottom:.6rem">// Casos de uso principales</h4>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:1.25rem">
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem">
+          <div style="color:#f85149;font-weight:600;margin-bottom:.3rem">✦ Enumeración de servicios</div>
+          <div style="color:var(--muted);line-height:1.6">Identificar en profundidad qué información expone cada servicio activo en la red.</div>
+        </div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem">
+          <div style="color:#f85149;font-weight:600;margin-bottom:.3rem">✦ Detección de configuraciones</div>
+          <div style="color:var(--muted);line-height:1.6">Encontrar credenciales por defecto y configuraciones inseguras en dispositivos de red.</div>
+        </div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem">
+          <div style="color:#f85149;font-weight:600;margin-bottom:.3rem">✦ Mapeo de vectores</div>
+          <div style="color:var(--muted);line-height:1.6">Construir un mapa de los posibles vectores de ataque disponibles en la red auditada.</div>
+        </div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem">
+          <div style="color:#f85149;font-weight:600;margin-bottom:.3rem">✦ Reportes de riesgo</div>
+          <div style="color:var(--muted);line-height:1.6">Generar reportes que priorizan los hallazgos por nivel de riesgo (crítico, alto, medio, bajo).</div>
+        </div>
+      </div>
+
+      <div style="background:rgba(248,81,73,.08);border:1px solid rgba(248,81,73,.2);border-left:3px solid #f85149;border-radius:8px;padding:.9rem 1rem;font-size:.83rem;color:var(--muted)">
+        <strong style="color:#f85149">⚠ Uso ético:</strong> Como toda herramienta de análisis de vulnerabilidades, Deephat debe utilizarse únicamente con autorización expresa del propietario de la red. Su uso no autorizado está tipificado como delito en la Ley 1273 de 2009.
+      </div>
+    `
+  },
+
+  /* ══════════════════════════════════════════════════
+     WIRESHARK — contenido completo
+  ══════════════════════════════════════════════════ */
+  wireshark: {
+    title: 'Wireshark — Analizador de Paquetes de Red',
+    body: `
+      <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1.25rem">
+        <div style="width:44px;height:44px;border-radius:12px;background:rgba(63,185,80,.12);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0"><i class="fa-solid fa-wave-square"></i></div>
+        <div>
+          <div style="font-size:.7rem;font-family:var(--mono);color:var(--green);margin-bottom:.2rem">TRÁFICO DE RED · CÓDIGO ABIERTO</div>
+          <div style="font-size:.82rem;color:var(--muted)">Gerald Combs · GPL-2.0 · wireshark.org</div>
+        </div>
+      </div>
+
+      <h4 style="font-size:.82rem;color:var(--green);font-family:var(--mono);margin-bottom:.6rem">// ¿Qué es?</h4>
+      <p style="color:var(--muted);font-size:.87rem;line-height:1.85;margin-bottom:1.25rem">
+        <strong style="color:var(--text)">Wireshark</strong> es el analizador de protocolos de red más utilizado en el mundo. Captura todo el tráfico que pasa por una interfaz de red y lo presenta de forma organizada, permitiendo inspeccionar cada paquete individualmente hasta el nivel de byte. Soporta más de 3000 protocolos distintos.
+      </p>
+
+      <h4 style="font-size:.82rem;color:var(--green);font-family:var(--mono);margin-bottom:.6rem">// ¿Para qué sirve en seguridad?</h4>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:1.25rem">
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem">
+          <div style="color:var(--green);font-weight:600;margin-bottom:.3rem">✦ Detectar credenciales</div>
+          <div style="color:var(--muted);line-height:1.6">Credenciales enviadas en texto plano por HTTP, FTP o Telnet son visibles en los paquetes.</div>
+        </div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem">
+          <div style="color:var(--green);font-weight:600;margin-bottom:.3rem">✦ Analizar protocolos</div>
+          <div style="color:var(--muted);line-height:1.6">Ver DNS, ARP, DHCP, HTTP, TLS y cualquier protocolo de red en tiempo real.</div>
+        </div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem">
+          <div style="color:var(--green);font-weight:600;margin-bottom:.3rem">✦ Detectar anomalías</div>
+          <div style="color:var(--muted);line-height:1.6">Paquetes malformados, ARP spoofing, escaneos de puertos y floods de red.</div>
+        </div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem">
+          <div style="color:var(--green);font-weight:600;margin-bottom:.3rem">✦ Diagnóstico de red</div>
+          <div style="color:var(--muted);line-height:1.6">Latencia, retransmisiones TCP, timeouts y problemas de resolución DNS.</div>
+        </div>
+      </div>
+
+      <h4 style="font-size:.82rem;color:var(--green);font-family:var(--mono);margin-bottom:.6rem">// ¿Cómo funciona?</h4>
+      <p style="color:var(--muted);font-size:.87rem;line-height:1.85;margin-bottom:1.25rem">
+        Wireshark pone la tarjeta de red en <strong style="color:var(--text)">modo promiscuo</strong>, lo que permite capturar no solo el tráfico destinado a ese equipo, sino todo el tráfico que pasa por la interfaz de red. En redes con switches modernos, solo se captura el tráfico del propio equipo y el broadcast, a menos que se realice un ataque de ARP spoofing para redirigir el tráfico ajeno.
+      </p>
+
+      <h4 style="font-size:.82rem;color:var(--green);font-family:var(--mono);margin-bottom:.6rem">// Filtros de visualización más útiles</h4>
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:1rem 1.25rem;font-family:var(--mono);font-size:.77rem;line-height:2.1;margin-bottom:1.25rem">
+        <div><span style="color:var(--muted)"># Solo tráfico HTTP</span></div>
+        <div style="margin-bottom:.4rem"><span style="color:var(--green)">http</span></div>
+        <div><span style="color:var(--muted)"># Tráfico de/hacia una IP específica</span></div>
+        <div style="margin-bottom:.4rem"><span style="color:var(--green)">ip.addr == 192.168.1.50</span></div>
+        <div><span style="color:var(--muted)"># Solo peticiones POST (formularios con datos)</span></div>
+        <div style="margin-bottom:.4rem"><span style="color:var(--green)">http.request.method == "POST"</span></div>
+        <div><span style="color:var(--muted)"># Detectar ARP spoofing (IPs duplicadas)</span></div>
+        <div style="margin-bottom:.4rem"><span style="color:var(--green)">arp.duplicate-address-detected</span></div>
+        <div><span style="color:var(--muted)"># Solo tráfico DNS</span></div>
+        <div style="margin-bottom:.4rem"><span style="color:var(--green)">dns</span></div>
+        <div><span style="color:var(--muted)"># Paquetes TCP con errores (retransmisiones)</span></div>
+        <div><span style="color:var(--green)">tcp.analysis.retransmission</span></div>
+      </div>
+
+      <h4 style="font-size:.82rem;color:var(--green);font-family:var(--mono);margin-bottom:.6rem">// Ejemplo: captura de credenciales FTP</h4>
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:1rem 1.25rem;font-family:var(--mono);font-size:.76rem;line-height:2;margin-bottom:1.25rem">
+        <div style="color:var(--muted)">No. │ Protocol │ Info</div>
+        <div><span style="color:var(--green)">42  </span><span style="color:var(--muted)">  FTP  │ Response: 220 ProFTPD Server ready</span></div>
+        <div><span style="color:var(--green)">43  </span><span style="color:var(--muted)">  FTP  │ Request: USER </span><span style="color:#f85149">admin</span></div>
+        <div><span style="color:var(--green)">44  </span><span style="color:var(--muted)">  FTP  │ Response: 331 Password required</span></div>
+        <div><span style="color:var(--green)">45  </span><span style="color:var(--muted)">  FTP  │ Request: PASS </span><span style="color:#f85149">contraseña123</span><span style="color:var(--orange)">  ← visible en texto plano</span></div>
+        <div><span style="color:var(--green)">46  </span><span style="color:var(--muted)">  FTP  │ Response: 230 User admin logged in</span></div>
+      </div>
+      <p style="font-size:.8rem;color:var(--muted);line-height:1.7;margin-bottom:1.25rem">
+        En este ejemplo, la contraseña del servidor FTP viaja completamente en texto plano. Wireshark la captura sin ningún esfuerzo. La solución es usar <strong style="color:var(--text)">SFTP o FTPS</strong> en lugar de FTP estándar.
+      </p>
+
+      <div style="background:rgba(63,185,80,.08);border:1px solid rgba(63,185,80,.2);border-left:3px solid var(--green);border-radius:8px;padding:.9rem 1rem;font-size:.83rem;color:var(--muted)">
+        <strong style="color:var(--green)">ℹ Captura vs análisis:</strong> Puedes capturar tráfico con <code style="color:var(--green)">tcpdump -w archivo.pcap</code> en un servidor sin interfaz gráfica y luego abrir el archivo .pcap en Wireshark para analizarlo visualmente. Son herramientas perfectamente complementarias.
+      </div>
+    `
+  },
+
+  /* ══════════════════════════════════════════════════
+     HYDRA — contenido completo
+  ══════════════════════════════════════════════════ */
+  hydra: {
+    title: 'Hydra — Fuerza Bruta en Servicios de Red',
+    body: `
+      <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1.25rem">
+        <div style="width:44px;height:44px;border-radius:12px;background:rgba(248,81,73,.12);color:var(--red);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0"><i class="fa-solid fa-key"></i></div>
+        <div>
+          <div style="font-size:.7rem;font-family:var(--mono);color:var(--red);margin-bottom:.2rem">EXPLOTACIÓN · CONTRASEÑAS · KALI LINUX</div>
+          <div style="font-size:.82rem;color:var(--muted)">THC Group · AGPL-3.0 · github.com/vanhauser-thc/thc-hydra</div>
+        </div>
+      </div>
+
+      <h4 style="font-size:.82rem;color:var(--red);font-family:var(--mono);margin-bottom:.6rem">// ¿Qué es?</h4>
+      <p style="color:var(--muted);font-size:.87rem;line-height:1.85;margin-bottom:1.25rem">
+        <strong style="color:var(--text)">Hydra</strong> es la herramienta de fuerza bruta en línea más rápida y flexible disponible en Kali Linux. Automatiza intentos de autenticación contra servicios de red probando miles de combinaciones de usuario y contraseña por segundo, usando múltiples hilos paralelos. Es esencial en auditorías para evaluar la robustez de las contraseñas de los servicios expuestos.
+      </p>
+
+      <h4 style="font-size:.82rem;color:var(--red);font-family:var(--mono);margin-bottom:.6rem">// Protocolos que soporta</h4>
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.9rem 1rem;font-family:var(--mono);font-size:.78rem;line-height:2;margin-bottom:1.25rem;color:var(--muted)">
+        <span style="color:var(--accent2)">SSH</span> · <span style="color:var(--accent2)">FTP</span> · <span style="color:var(--accent2)">HTTP/HTTPS</span> · <span style="color:var(--accent2)">SMB</span> · <span style="color:var(--accent2)">RDP</span> · <span style="color:var(--accent2)">MySQL</span> · <span style="color:var(--accent2)">PostgreSQL</span> · <span style="color:var(--accent2)">Telnet</span> · <span style="color:var(--accent2)">SMTP</span> · <span style="color:var(--accent2)">POP3</span> · <span style="color:var(--accent2)">IMAP</span> · <span style="color:var(--accent2)">VNC</span> · <span style="color:var(--accent2)">LDAP</span> · <span style="color:var(--accent2)">Redis</span> · y más de 40 protocolos adicionales
+      </div>
+
+      <h4 style="font-size:.82rem;color:var(--red);font-family:var(--mono);margin-bottom:.6rem">// Comandos esenciales</h4>
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:1rem 1.25rem;font-family:var(--mono);font-size:.77rem;line-height:2.1;margin-bottom:1.25rem">
+        <div><span style="color:var(--muted)"># Fuerza bruta SSH con usuario fijo y wordlist</span></div>
+        <div style="margin-bottom:.5rem"><span style="color:var(--green)">hydra -l admin -P /usr/share/wordlists/rockyou.txt ssh://192.168.1.1</span></div>
+        <div><span style="color:var(--muted)"># Lista de usuarios Y contraseñas</span></div>
+        <div style="margin-bottom:.5rem"><span style="color:var(--green)">hydra -L users.txt -P passwords.txt ftp://192.168.1.10</span></div>
+        <div><span style="color:var(--muted)"># Formulario de login HTTP (POST)</span></div>
+        <div style="margin-bottom:.5rem"><span style="color:var(--green)">hydra -l admin -P rockyou.txt 192.168.1.10 http-post-form "/login:user=^USER^&pass=^PASS^:Login incorrecto"</span></div>
+        <div><span style="color:var(--muted)"># Con 16 hilos paralelos para mayor velocidad</span></div>
+        <div style="margin-bottom:.5rem"><span style="color:var(--green)">hydra -l root -P rockyou.txt -t 16 ssh://192.168.1.1</span></div>
+        <div><span style="color:var(--muted)"># Fuerza bruta RDP (Escritorio Remoto Windows)</span></div>
+        <div><span style="color:var(--green)">hydra -l Administrator -P rockyou.txt rdp://192.168.1.20</span></div>
+      </div>
+
+      <h4 style="font-size:.82rem;color:var(--red);font-family:var(--mono);margin-bottom:.6rem">// Ejemplo de salida exitosa</h4>
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:1rem 1.25rem;font-family:var(--mono);font-size:.76rem;line-height:2;margin-bottom:1.25rem">
+        <div style="color:var(--muted)">Hydra v9.4 starting...</div>
+        <div style="color:var(--muted)">[DATA] attacking ssh://192.168.1.1:22/</div>
+        <div style="color:var(--muted)">[ATTEMPT] target 192.168.1.1 - login "admin" - pass "123456"</div>
+        <div style="color:var(--muted)">[ATTEMPT] target 192.168.1.1 - login "admin" - pass "password"</div>
+        <div><span style="color:var(--green)">[22][ssh] host: 192.168.1.1   login: admin   password: </span><span style="color:var(--red)">admin2024</span><span style="color:var(--orange)">  ← contraseña encontrada</span></div>
+        <div style="color:var(--muted)">1 of 1 target successfully completed, 1 valid password found</div>
+      </div>
+
+      <h4 style="font-size:.82rem;color:var(--red);font-family:var(--mono);margin-bottom:.6rem">// ¿Cómo protegerse?</h4>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:1.25rem">
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem">
+          <div style="color:var(--green);font-weight:600;margin-bottom:.3rem">✦ Fail2ban</div>
+          <div style="color:var(--muted);line-height:1.6">Bloquea automáticamente IPs tras varios intentos fallidos consecutivos.</div>
+        </div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem">
+          <div style="color:var(--green);font-weight:600;margin-bottom:.3rem">✦ Llaves SSH</div>
+          <div style="color:var(--muted);line-height:1.6">Desactivar login SSH con contraseña. Usar solo autenticación por clave pública.</div>
+        </div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem">
+          <div style="color:var(--green);font-weight:600;margin-bottom:.3rem">✦ Doble factor (2FA)</div>
+          <div style="color:var(--muted);line-height:1.6">Aunque Hydra encuentre la contraseña, el segundo factor bloquea el acceso.</div>
+        </div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem">
+          <div style="color:var(--green);font-weight:600;margin-bottom:.3rem">✦ Cambiar puertos</div>
+          <div style="color:var(--muted);line-height:1.6">Mover SSH del puerto 22 a un puerto alto reduce los ataques automatizados.</div>
+        </div>
+      </div>
+
+      <div style="background:rgba(248,81,73,.08);border:1px solid rgba(248,81,73,.2);border-left:3px solid var(--red);border-radius:8px;padding:.9rem 1rem;font-size:.83rem;color:var(--muted)">
+        <strong style="color:var(--red)">⚠ Uso ético obligatorio:</strong> Hydra solo debe usarse en sistemas propios o con autorización escrita del propietario. Atacar sistemas ajenos con Hydra es un delito tipificado en la Ley 1273 de 2009 con penas de hasta 8 años de prisión.
+      </div>
+    `
+  },
+
+  /* ══════════════════════════════════════════════════
+     NIKTO — contenido completo
+  ══════════════════════════════════════════════════ */
+  nikto: {
+    title: 'Nikto — Escáner de Vulnerabilidades Web',
+    body: `
+      <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1.25rem">
+        <div style="width:44px;height:44px;border-radius:12px;background:rgba(188,140,255,.12);color:var(--purple);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0"><i class="fa-solid fa-spider"></i></div>
+        <div>
+          <div style="font-size:.7rem;font-family:var(--mono);color:var(--purple);margin-bottom:.2rem">SEGURIDAD WEB · KALI LINUX</div>
+          <div style="font-size:.82rem;color:var(--muted)">Chris Sullo · GPL-2.0 · cirt.net/Nikto2</div>
+        </div>
+      </div>
+
+      <h4 style="font-size:.82rem;color:var(--purple);font-family:var(--mono);margin-bottom:.6rem">// ¿Qué es?</h4>
+      <p style="color:var(--muted);font-size:.87rem;line-height:1.85;margin-bottom:1.25rem">
+        <strong style="color:var(--text)">Nikto</strong> es un escáner de código abierto que analiza servidores web en busca de problemas de seguridad. Revisa más de <strong style="color:var(--text)">6,700 archivos y configuraciones potencialmente peligrosas</strong>, versiones desactualizadas de software con CVEs conocidos y problemas de configuración en cabeceras HTTP.
+      </p>
+
+      <h4 style="font-size:.82rem;color:var(--purple);font-family:var(--mono);margin-bottom:.6rem">// ¿Qué detecta exactamente?</h4>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:1.25rem">
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem">
+          <div style="color:var(--purple);font-weight:600;margin-bottom:.3rem">✦ Software desactualizado</div>
+          <div style="color:var(--muted);line-height:1.6">Apache, Nginx, PHP, WordPress y plugins con versiones vulnerables conocidas.</div>
+        </div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem">
+          <div style="color:var(--purple);font-weight:600;margin-bottom:.3rem">✦ Rutas peligrosas</div>
+          <div style="color:var(--muted);line-height:1.6">/admin, /backup, /.git, /phpinfo.php, /wp-admin expuestas al público.</div>
+        </div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem">
+          <div style="color:var(--purple);font-weight:600;margin-bottom:.3rem">✦ Cabeceras de seguridad</div>
+          <div style="color:var(--muted);line-height:1.6">X-Frame-Options, HSTS, CSP, X-Content-Type-Options ausentes o mal configuradas.</div>
+        </div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem">
+          <div style="color:var(--purple);font-weight:600;margin-bottom:.3rem">✦ Métodos HTTP peligrosos</div>
+          <div style="color:var(--muted);line-height:1.6">PUT y DELETE habilitados en el servidor, permitiendo subir o borrar archivos.</div>
+        </div>
+      </div>
+
+      <h4 style="font-size:.82rem;color:var(--purple);font-family:var(--mono);margin-bottom:.6rem">// Comandos esenciales</h4>
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:1rem 1.25rem;font-family:var(--mono);font-size:.77rem;line-height:2.1;margin-bottom:1.25rem">
+        <div><span style="color:var(--muted)"># Escaneo básico a un servidor web</span></div>
+        <div style="margin-bottom:.5rem"><span style="color:var(--green)">nikto -h http://192.168.1.10</span></div>
+        <div><span style="color:var(--muted)"># Con puerto personalizado</span></div>
+        <div style="margin-bottom:.5rem"><span style="color:var(--green)">nikto -h 192.168.1.10 -p 8080</span></div>
+        <div><span style="color:var(--muted)"># Escaneo HTTPS</span></div>
+        <div style="margin-bottom:.5rem"><span style="color:var(--green)">nikto -h https://192.168.1.10 -ssl</span></div>
+        <div><span style="color:var(--muted)"># Guardar reporte en HTML</span></div>
+        <div style="margin-bottom:.5rem"><span style="color:var(--green)">nikto -h 192.168.1.10 -o reporte.html -Format htm</span></div>
+        <div><span style="color:var(--muted)"># Escaneo con autenticación básica</span></div>
+        <div><span style="color:var(--green)">nikto -h 192.168.1.10 -id admin:password</span></div>
+      </div>
+
+      <h4 style="font-size:.82rem;color:var(--purple);font-family:var(--mono);margin-bottom:.6rem">// Ejemplo de salida real</h4>
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:1rem 1.25rem;font-family:var(--mono);font-size:.76rem;line-height:2;margin-bottom:1.25rem">
+        <div style="color:var(--muted)">- Nikto v2.1.6</div>
+        <div style="color:var(--muted)">+ Target IP: 192.168.1.10   Port: 80</div>
+        <div style="color:var(--muted)">+ Server: <span style="color:var(--accent2)">Apache/2.4.38 (Debian)</span></div>
+        <div style="margin-top:.3rem"><span style="color:var(--red)">+ OSVDB-3092: /admin/: This might be interesting...</span></div>
+        <div><span style="color:var(--red)">+ OSVDB-3268: /backup/: Directory indexing found</span></div>
+        <div><span style="color:var(--orange)">+ Apache/2.4.38 appears to be outdated (current: 2.4.57)</span></div>
+        <div><span style="color:var(--red)">+ /phpinfo.php: PHP info file found — expone configuración del servidor</span></div>
+        <div><span style="color:var(--orange)">+ Cabecera X-Frame-Options no definida — vulnerable a clickjacking</span></div>
+        <div style="margin-top:.3rem;color:var(--muted)">+ 6448 items checked: 12 error(s) and 5 item(s) reported</div>
+      </div>
+
+      <div style="background:rgba(188,140,255,.08);border:1px solid rgba(188,140,255,.2);border-left:3px solid var(--purple);border-radius:8px;padding:.9rem 1rem;font-size:.83rem;color:var(--muted)">
+        <strong style="color:var(--purple)">⚠ Importante:</strong> Nikto genera mucho tráfico y activa fácilmente los sistemas IDS/WAF. No es una herramienta sigilosa — úsala solo en entornos de prueba autorizados y coordina con el equipo de seguridad del cliente antes de ejecutarla en producción.
+      </div>
+    `
+  }
+};
+
+function showTool(name) {
+  const data = toolData[name];
+  if (!data) {
+    document.getElementById('modal-title').textContent = name.charAt(0).toUpperCase() + name.slice(1);
+    document.getElementById('modal-body').innerHTML = '<p style="color:var(--muted);font-size:.88rem">Página de esta herramienta <strong style="color:var(--accent2)">próximamente</strong> — en desarrollo para el siguiente avance del proyecto.</p>';
+  } else {
+    document.getElementById('modal-title').textContent = data.title;
+    document.getElementById('modal-body').innerHTML = data.body;
+  }
+  document.getElementById('modal').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function closeModal() {
+  document.getElementById('modal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+document.getElementById('modal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+function filterTools(cat, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.tool-card').forEach(card => {
+    const cats = card.dataset.cat || '';
+    card.style.display = (cat === 'todas' || cats.includes(cat)) ? '' : 'none';
+  });
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+</script>
+<!-- ══════════════════════════════════════════════════════════
+     KALIBOT — Botón flotante + Panel de chat con IA
+════════════════════════════════════════════════════════════ -->
+
+<!-- Botón flotante -->
+<button id="kalibot-fab" onclick="openKaliBot()" title="Preguntar al KaliBot IA">
+  <i class="fa-solid fa-robot"></i>
+  <div class="fab-badge"></div>
+</button>
+
+<!-- Panel de chat -->
+<div id="kalibot-panel">
+
+  <!-- Header -->
+  <div class="kb-header">
+    <div class="kb-avatar"><i class="fa-solid fa-robot"></i></div>
+    <div class="kb-info">
+      <div class="kb-name">KaliBot <span style="font-size:.68rem;color:var(--muted);font-weight:400">· VulnScan Lab</span></div>
+      <div class="kb-status">Listo para responder</div>
+    </div>
+    <div class="kb-actions">
+      <button class="kb-btn" onclick="clearKaliBot()" title="Limpiar conversación"><i class="fa-solid fa-rotate-left"></i></button>
+      <button class="kb-btn" onclick="closeKaliBot()" title="Cerrar"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+  </div>
+
+  <!-- Sugerencias rápidas -->
+  <div class="kb-suggestions">
+    <span class="kb-chip" onclick="kbSend('¿Cuál es la diferencia entre Nmap y Netdiscover?')">Nmap vs Netdiscover</span>
+    <span class="kb-chip" onclick="kbSend('¿Cómo capturo tráfico con Wireshark?')">Wireshark</span>
+    <span class="kb-chip" onclick="kbSend('¿Para qué sirve Metasploit?')">Metasploit</span>
+    <span class="kb-chip" onclick="kbSend('¿Qué hace el flag -sV en Nmap?')">nmap -sV</span>
+    <span class="kb-chip" onclick="kbSend('¿Cómo funciona Hydra para SSH?')">Hydra SSH</span>
+    <span class="kb-chip" onclick="kbSend('¿Qué diferencia hay entre Grafana y Zabbix?')">Grafana vs Zabbix</span>
+  </div>
+
+  <!-- Mensajes -->
+  <div class="kb-messages" id="kb-messages">
+    <div class="kb-welcome">
+      👋 Hola, soy <strong>KaliBot</strong>. Estoy programado exclusivamente para responder preguntas sobre las <strong>15 herramientas de Kali Linux</strong> documentadas en este sitio.<br><br>
+      Pregúntame sobre comandos, casos de uso, diferencias entre herramientas o cómo usarlas en auditorías de red.
+    </div>
+  </div>
+
+  <!-- Input -->
+  <div class="kb-input-area">
+    <div class="kb-input-row">
+      <textarea id="kb-input" rows="1"
+        placeholder="Pregunta sobre Nmap, Wireshark, Metasploit..."
+        onkeydown="kbHandleKey(event)"
+        oninput="kbResize(this)"></textarea>
+      <button class="kb-send" id="kb-send-btn" onclick="kbSendFromInput()">
+        <i class="fa-solid fa-paper-plane"></i>
+      </button>
+    </div>
+    <div class="kb-hint">Solo responde preguntas sobre herramientas de Kali Linux · Enter para enviar</div>
+  </div>
+
+</div>
+
+<!-- ── SCRIPTS KALIBOT ──────────────────────────────────── -->
+<script>
+/* ─── Estado ─────────────────────────────────────────── */
+let kbHistory  = [];
+let kbOpen     = false;
+let kbBusy     = false;
+
+/* ─── System prompt — la IA solo responde sobre Kali ── */
+const KB_SYSTEM = `Eres KaliBot, un asistente educativo especializado EXCLUSIVAMENTE en las herramientas de Kali Linux para detección de vulnerabilidades en redes locales. Formas parte de VulnScan Lab, un proyecto educativo universitario colombiano.
+
+HERRAMIENTAS QUE PUEDES EXPLICAR (ÚNICAMENTE estas):
+Reconocimiento: Nmap, Netdiscover
+Tráfico de red: Wireshark, Tcpdump
+Seguridad web: Nikto, Burp Suite
+Vulnerabilidades: OpenVAS / GVM
+Explotación: Metasploit, Hydra, Sqlmap
+Wi-Fi: Aircrack-ng
+Redes: Netcat
+Monitoreo: Grafana, Zabbix
+Análisis profundo: Deephat
+
+REGLAS OBLIGATORIAS:
+1. Si la pregunta NO es sobre estas herramientas o conceptos directamente relacionados (redes, puertos, protocolos, CVEs, auditorías, hacking ético), responde EXACTAMENTE: "⚠️ Solo puedo responder preguntas sobre las herramientas de Kali Linux documentadas en VulnScan Lab. Pregunta sobre Nmap, Wireshark, Metasploit, Hydra, Nikto, Burp Suite, OpenVAS, Aircrack-ng, Netcat, Tcpdump, Sqlmap, Grafana, Zabbix o Deephat."
+2. Siempre incluye contexto de uso ético en técnicas ofensivas.
+3. Formatea comandos con triple backtick.
+4. Responde SIEMPRE en español.
+5. Sé preciso y pedagógico: explica POR QUÉ funciona cada comando.
+6. Máximo 350 palabras por respuesta.
+7. Usa **negrita** para términos clave y listas cuando enumeres pasos.`;
+
+/* ─── Abrir / cerrar panel ───────────────────────────── */
+function openKaliBot() {
+  kbOpen = true;
+  document.getElementById('kalibot-panel').classList.add('open');
+  document.getElementById('kb-input').focus();
+}
+function closeKaliBot() {
+  kbOpen = false;
+  document.getElementById('kalibot-panel').classList.remove('open');
+}
+function clearKaliBot() {
+  kbHistory = [];
+  const msgs = document.getElementById('kb-messages');
+  msgs.innerHTML = `<div class="kb-welcome">
+    👋 Conversación reiniciada. Soy <strong>KaliBot</strong>, pregúntame sobre las herramientas de Kali Linux.
+  </div>`;
+}
+
+/* ─── Renderizar markdown básico ─────────────────────── */
+function kbRender(text) {
+  return text
+    .replace(/```[\w]*\n?([\s\S]*?)```/g, (_,c) =>
+      `<pre>${c.trim().replace(/</g,'&lt;').replace(/>/g,'&gt;')}</pre>`)
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/^- (.+)$/gm, '<li>$1</li>')
+    .replace(/(<li>[\s\S]*?<\/li>)+/g, s => `<ul>${s}</ul>`)
+    .replace(/\n\n/g, '</p><p>')
+    .replace(/\n/g, '<br>');
+}
+
+/* ─── Agregar burbuja al chat ─────────────────────────── */
+function kbAddMsg(role, html) {
+  const msgs = document.getElementById('kb-messages');
+  const div  = document.createElement('div');
+  div.className = `kb-msg ${role}`;
+  const icon = role === 'bot'
+    ? '<i class="fa-solid fa-robot"></i>'
+    : '<i class="fa-solid fa-user"></i>';
+  div.innerHTML = `
+    <div class="kb-msg-av">${icon}</div>
+    <div class="kb-bubble">${role === 'bot' ? `<p>${html}</p>` : html}</div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+/* ─── Indicador "escribiendo" ────────────────────────── */
+function kbShowTyping() {
+  const msgs = document.getElementById('kb-messages');
+  const div  = document.createElement('div');
+  div.className = 'kb-msg bot'; div.id = 'kb-typing';
+  div.innerHTML = `
+    <div class="kb-msg-av"><i class="fa-solid fa-robot"></i></div>
+    <div class="kb-typing-dots"><span></span><span></span><span></span></div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+function kbHideTyping() {
+  const t = document.getElementById('kb-typing');
+  if (t) t.remove();
+}
+
+/* ─── Enviar mensaje ─────────────────────────────────── */
+async function kbSend(text) {
+  if (!text.trim() || kbBusy) return;
+  if (!kbOpen) openKaliBot();
+
+  kbAddMsg('user', text);
+  kbHistory.push({ role: 'user', content: text });
+
+  kbBusy = true;
+  document.getElementById('kb-send-btn').disabled = true;
+  document.getElementById('kb-input').disabled    = true;
+  kbShowTyping();
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model:      'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system:     KB_SYSTEM,
+        messages:   kbHistory
+      })
+    });
+
+    const data  = await res.json();
+    kbHideTyping();
+
+    const reply = data?.content?.[0]?.text
+      || '❌ No pude obtener respuesta. Intenta de nuevo.';
+
+    kbAddMsg('bot', kbRender(reply));
+    kbHistory.push({ role: 'assistant', content: reply });
+
+  } catch (err) {
+    kbHideTyping();
+    kbAddMsg('bot', `❌ <strong>Error de conexión.</strong> Verifica tu acceso a internet.<br><code>${err.message}</code>`);
+  }
+
+  kbBusy = false;
+  document.getElementById('kb-send-btn').disabled = false;
+  document.getElementById('kb-input').disabled    = false;
+  document.getElementById('kb-input').focus();
+}
+
+function kbSendFromInput() {
+  const input = document.getElementById('kb-input');
+  const text  = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  kbResize(input);
+  kbSend(text);
+}
+
+function kbHandleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); kbSendFromInput(); }
+}
+
+function kbResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 90) + 'px';
+}
+
+/* ─── Cerrar con Escape ──────────────────────────────── */
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && kbOpen) closeKaliBot();
+});
+</script>
+
+</body>
+</html>
