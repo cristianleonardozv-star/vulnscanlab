@@ -1665,8 +1665,12 @@ async function kbSend(text) {
   document.getElementById('kb-input').disabled    = true;
   kbShowTyping();
 
+  // ── URL del proxy Cloudflare Worker ──────────────────
+  // Reemplaza esta URL con la tuya después de crear el Worker
+  const PROXY_URL = 'https://kalibot-proxy.crismolgor123.workers.dev';
+
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await fetch(PROXY_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -1676,6 +1680,10 @@ async function kbSend(text) {
         messages:   kbHistory
       })
     });
+
+    if (!res.ok) {
+      throw new Error(`El servidor respondió con código ${res.status}`);
+    }
 
     const data  = await res.json();
     kbHideTyping();
@@ -1688,7 +1696,14 @@ async function kbSend(text) {
 
   } catch (err) {
     kbHideTyping();
-    kbAddMsg('bot', `❌ <strong>Error de conexión.</strong> Verifica tu acceso a internet.<br><code>${err.message}</code>`);
+    // Mensaje de error amigable según el tipo de fallo
+    let errMsg = '❌ <strong>No se pudo conectar con KaliBot.</strong><br>';
+    if (err.message.includes('Failed to fetch') || err.message.includes('NetworkError')) {
+      errMsg += 'Asegúrate de haber configurado el Worker de Cloudflare y actualizado la URL en el código.';
+    } else {
+      errMsg += `<code style="font-size:.72rem">${err.message}</code>`;
+    }
+    kbAddMsg('bot', errMsg);
   }
 
   kbBusy = false;
