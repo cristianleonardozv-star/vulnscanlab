@@ -962,7 +962,7 @@
 <!-- ── WIP BADGE ─────────────────────────────────────────── -->
 <div class="wip-banner">
   <div class="wip-dot"></div>
-  Cuarto avance · KaliBot IA integrado
+  Versión final · 15 herramientas completas
 </div>
 
 <!-- ── SCRIPTS ────────────────────────────────────────────── -->
@@ -1464,6 +1464,305 @@ const toolData = {
 
       <div style="background:rgba(188,140,255,.08);border:1px solid rgba(188,140,255,.2);border-left:3px solid var(--purple);border-radius:8px;padding:.9rem 1rem;font-size:.83rem;color:var(--muted)">
         <strong style="color:var(--purple)">⚠ Importante:</strong> Nikto genera mucho tráfico y activa fácilmente los sistemas IDS/WAF. No es una herramienta sigilosa — úsala solo en entornos de prueba autorizados y coordina con el equipo de seguridad del cliente antes de ejecutarla en producción.
+      </div>
+    `
+  },
+
+  /* ══════════════════════════════════════════════════
+     NETDISCOVER
+  ══════════════════════════════════════════════════ */
+  netdiscover: {
+    title: 'Netdiscover — Descubrimiento de Hosts ARP',
+    body: `
+      <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1.25rem">
+        <div style="width:44px;height:44px;border-radius:12px;background:rgba(56,139,253,.12);color:#58a6ff;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0"><i class="fa-solid fa-network-wired"></i></div>
+        <div>
+          <div style="font-size:.7rem;font-family:var(--mono);color:#58a6ff;margin-bottom:.2rem">RECONOCIMIENTO · KALI LINUX</div>
+          <div style="font-size:.82rem;color:var(--muted)">Jaime Penalba · GPL · kali.org/tools/netdiscover</div>
+        </div>
+      </div>
+      <h4 style="font-size:.82rem;color:var(--accent2);font-family:var(--mono);margin-bottom:.6rem">// ¿Qué es?</h4>
+      <p style="color:var(--muted);font-size:.87rem;line-height:1.85;margin-bottom:1.25rem"><strong style="color:var(--text)">Netdiscover</strong> es una herramienta de reconocimiento activo y pasivo de redes locales basada en el protocolo ARP. Descubre todos los dispositivos conectados a una LAN obteniendo su IP y dirección MAC, sin necesidad de usar TCP o UDP. Es más rápida que Nmap para este propósito específico.</p>
+      <h4 style="font-size:.82rem;color:var(--accent2);font-family:var(--mono);margin-bottom:.6rem">// ¿Cómo funciona?</h4>
+      <p style="color:var(--muted);font-size:.87rem;line-height:1.85;margin-bottom:1.25rem">En modo <strong style="color:var(--text)">activo</strong> envía peticiones ARP broadcast a toda la subred y registra las respuestas. En modo <strong style="color:var(--text)">pasivo</strong> escucha el tráfico ARP existente sin generar ningún paquete propio, haciéndolo completamente indetectable para sistemas IDS.</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:1.25rem">
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem"><div style="color:#58a6ff;font-weight:600;margin-bottom:.3rem">✦ Modo activo</div><div style="color:var(--muted)">Envía peticiones ARP broadcast. Rápido pero detectable.</div></div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem"><div style="color:#58a6ff;font-weight:600;margin-bottom:.3rem">✦ Modo pasivo</div><div style="color:var(--muted)">Solo escucha. Indetectable por IDS. Más lento.</div></div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem"><div style="color:#58a6ff;font-weight:600;margin-bottom:.3rem">✦ Vendor MAC</div><div style="color:var(--muted)">Identifica el fabricante de cada dispositivo por su dirección MAC.</div></div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem"><div style="color:#58a6ff;font-weight:600;margin-bottom:.3rem">✦ Sin dependencias</div><div style="color:var(--muted)">No necesita que los hosts tengan puertos abiertos para detectarlos.</div></div>
+      </div>
+      <h4 style="font-size:.82rem;color:var(--accent2);font-family:var(--mono);margin-bottom:.6rem">// Comandos esenciales</h4>
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:1rem 1.25rem;font-family:var(--mono);font-size:.77rem;line-height:2.1;margin-bottom:1.25rem">
+        <div><span style="color:var(--muted)"># Escaneo activo de una subred</span></div>
+        <div style="margin-bottom:.4rem"><span style="color:var(--green)">sudo netdiscover -r 192.168.1.0/24</span></div>
+        <div><span style="color:var(--muted)"># Modo pasivo — solo escucha, no envía paquetes</span></div>
+        <div style="margin-bottom:.4rem"><span style="color:var(--green)">sudo netdiscover -p</span></div>
+        <div><span style="color:var(--muted)"># Especificar interfaz de red</span></div>
+        <div style="margin-bottom:.4rem"><span style="color:var(--green)">sudo netdiscover -i eth0 -r 192.168.1.0/24</span></div>
+        <div><span style="color:var(--muted)"># Guardar resultados en archivo</span></div>
+        <div><span style="color:var(--green)">sudo netdiscover -r 192.168.1.0/24 -L</span></div>
+      </div>
+      <h4 style="font-size:.82rem;color:var(--accent2);font-family:var(--mono);margin-bottom:.6rem">// Ejemplo de salida</h4>
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:1rem 1.25rem;font-family:var(--mono);font-size:.76rem;line-height:2;margin-bottom:1.25rem">
+        <div style="color:var(--muted)"> IP             MAC Address        Vendor</div>
+        <div><span style="color:var(--green)">192.168.1.1  </span><span style="color:var(--muted)">  a4:c3:f0:xx:xx  TP-Link Technologies</span></div>
+        <div><span style="color:var(--green)">192.168.1.5  </span><span style="color:var(--muted)">  00:50:56:xx:xx  VMware Inc.</span></div>
+        <div><span style="color:var(--green)">192.168.1.20 </span><span style="color:var(--muted)">  dc:a6:32:xx:xx  Raspberry Pi Foundation</span></div>
+        <div><span style="color:var(--green)">192.168.1.35 </span><span style="color:var(--muted)">  b8:27:eb:xx:xx  Raspberry Pi Foundation</span></div>
+      </div>
+      <div style="background:rgba(56,139,253,.08);border:1px solid rgba(56,139,253,.2);border-left:3px solid #58a6ff;border-radius:8px;padding:.9rem 1rem;font-size:.83rem;color:var(--muted)">
+        <strong style="color:#58a6ff">ℹ Caso de uso:</strong> Usar Netdiscover antes que Nmap para obtener el inventario de IPs activas. La columna Vendor revela qué tipo de dispositivo es cada IP (router, cámara IP, IoT, PC) sin necesidad de escanear puertos.
+      </div>
+    `
+  },
+
+  /* ══════════════════════════════════════════════════
+     TCPDUMP
+  ══════════════════════════════════════════════════ */
+  tcpdump: {
+    title: 'Tcpdump — Captura de Tráfico CLI',
+    body: `
+      <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1.25rem">
+        <div style="width:44px;height:44px;border-radius:12px;background:rgba(63,185,80,.12);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0"><i class="fa-solid fa-terminal"></i></div>
+        <div>
+          <div style="font-size:.7rem;font-family:var(--mono);color:var(--green);margin-bottom:.2rem">TRÁFICO DE RED · CLI · KALI LINUX</div>
+          <div style="font-size:.82rem;color:var(--muted)">Van Jacobson · BSD · kali.org/tools/tcpdump</div>
+        </div>
+      </div>
+      <h4 style="font-size:.82rem;color:var(--green);font-family:var(--mono);margin-bottom:.6rem">// ¿Qué es?</h4>
+      <p style="color:var(--muted);font-size:.87rem;line-height:1.85;margin-bottom:1.25rem"><strong style="color:var(--text)">Tcpdump</strong> es la alternativa por línea de comandos a Wireshark. Captura paquetes de red directamente desde la terminal, sin interfaz gráfica. Es ideal para servidores remotos, scripts automatizados y entornos sin GUI. Los archivos que genera (.pcap) pueden abrirse luego en Wireshark para análisis visual.</p>
+      <h4 style="font-size:.82rem;color:var(--green);font-family:var(--mono);margin-bottom:.6rem">// Wireshark vs Tcpdump</h4>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:1.25rem">
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem"><div style="color:var(--green);font-weight:600;margin-bottom:.3rem">✦ Sin GUI</div><div style="color:var(--muted)">Funciona en servidores sin entorno gráfico. Solo terminal.</div></div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem"><div style="color:var(--green);font-weight:600;margin-bottom:.3rem">✦ Muy ligero</div><div style="color:var(--muted)">Mínimo consumo de recursos. Ideal en producción.</div></div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem"><div style="color:var(--green);font-weight:600;margin-bottom:.3rem">✦ Scriptable</div><div style="color:var(--muted)">Se integra fácilmente en scripts bash para monitoreo automático.</div></div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem"><div style="color:var(--green);font-weight:600;margin-bottom:.3rem">✦ Guarda .pcap</div><div style="color:var(--muted)">Exporta capturas para abrir y analizar en Wireshark.</div></div>
+      </div>
+      <h4 style="font-size:.82rem;color:var(--green);font-family:var(--mono);margin-bottom:.6rem">// Comandos esenciales</h4>
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:1rem 1.25rem;font-family:var(--mono);font-size:.77rem;line-height:2.1;margin-bottom:1.25rem">
+        <div><span style="color:var(--muted)"># Capturar todo el tráfico en eth0</span></div>
+        <div style="margin-bottom:.4rem"><span style="color:var(--green)">sudo tcpdump -i eth0</span></div>
+        <div><span style="color:var(--muted)"># Filtrar solo tráfico HTTP (puerto 80)</span></div>
+        <div style="margin-bottom:.4rem"><span style="color:var(--green)">sudo tcpdump -i eth0 port 80</span></div>
+        <div><span style="color:var(--muted)"># Guardar captura en archivo .pcap para Wireshark</span></div>
+        <div style="margin-bottom:.4rem"><span style="color:var(--green)">sudo tcpdump -i eth0 -w captura.pcap</span></div>
+        <div><span style="color:var(--muted)"># Filtrar tráfico de una IP específica</span></div>
+        <div style="margin-bottom:.4rem"><span style="color:var(--green)">sudo tcpdump -i eth0 host 192.168.1.50</span></div>
+        <div><span style="color:var(--muted)"># Mostrar contenido en ASCII — detecta credenciales en texto plano</span></div>
+        <div style="margin-bottom:.4rem"><span style="color:var(--green)">sudo tcpdump -i eth0 -A port 21</span></div>
+        <div><span style="color:var(--muted)"># Capturar solo los primeros 100 paquetes</span></div>
+        <div><span style="color:var(--green)">sudo tcpdump -i eth0 -c 100</span></div>
+      </div>
+      <div style="background:rgba(63,185,80,.08);border:1px solid rgba(63,185,80,.2);border-left:3px solid var(--green);border-radius:8px;padding:.9rem 1rem;font-size:.83rem;color:var(--muted)">
+        <strong style="color:var(--green)">ℹ Flujo recomendado:</strong> Captura con <code style="color:var(--green)">tcpdump -w archivo.pcap</code> en el servidor remoto, luego descarga el archivo y ábrelo en Wireshark para análisis visual completo. Lo mejor de ambas herramientas.
+      </div>
+    `
+  },
+
+  /* ══════════════════════════════════════════════════
+     BURP SUITE
+  ══════════════════════════════════════════════════ */
+  burpsuite: {
+    title: 'Burp Suite — Proxy de Interceptación Web',
+    body: `
+      <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1.25rem">
+        <div style="width:44px;height:44px;border-radius:12px;background:rgba(188,140,255,.12);color:var(--purple);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0"><i class="fa-solid fa-bug"></i></div>
+        <div>
+          <div style="font-size:.7rem;font-family:var(--mono);color:var(--purple);margin-bottom:.2rem">SEGURIDAD WEB · PROXY</div>
+          <div style="font-size:.82rem;color:var(--muted)">PortSwigger · Community Edition gratuita · portswigger.net</div>
+        </div>
+      </div>
+      <h4 style="font-size:.82rem;color:var(--purple);font-family:var(--mono);margin-bottom:.6rem">// ¿Qué es?</h4>
+      <p style="color:var(--muted);font-size:.87rem;line-height:1.85;margin-bottom:1.25rem"><strong style="color:var(--text)">Burp Suite</strong> es la plataforma de pruebas de seguridad web más utilizada del mundo. Actúa como un <strong style="color:var(--text)">proxy de interceptación</strong> entre el navegador y el servidor web, permitiendo capturar, analizar y modificar cada petición y respuesta HTTP/HTTPS en tiempo real antes de que llegue a su destino.</p>
+      <h4 style="font-size:.82rem;color:var(--purple);font-family:var(--mono);margin-bottom:.6rem">// Módulos principales</h4>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:1.25rem">
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem"><div style="color:var(--purple);font-weight:600;margin-bottom:.3rem">✦ Proxy</div><div style="color:var(--muted)">Intercepta y modifica peticiones HTTP/HTTPS antes de enviarlas al servidor.</div></div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem"><div style="color:var(--purple);font-weight:600;margin-bottom:.3rem">✦ Repeater</div><div style="color:var(--muted)">Reenvía peticiones modificadas manualmente para probar vulnerabilidades.</div></div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem"><div style="color:var(--purple);font-weight:600;margin-bottom:.3rem">✦ Intruder</div><div style="color:var(--muted)">Automatiza ataques: fuerza bruta en formularios, fuzzing de parámetros.</div></div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem"><div style="color:var(--purple);font-weight:600;margin-bottom:.3rem">✦ Decoder</div><div style="color:var(--muted)">Codifica/decodifica datos: Base64, URL encoding, HTML entities.</div></div>
+      </div>
+      <h4 style="font-size:.82rem;color:var(--purple);font-family:var(--mono);margin-bottom:.6rem">// Configuración inicial</h4>
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:1rem 1.25rem;font-family:var(--mono);font-size:.77rem;line-height:2.1;margin-bottom:1.25rem">
+        <div><span style="color:var(--muted)"># 1. Iniciar Burp Suite desde Kali</span></div>
+        <div style="margin-bottom:.4rem"><span style="color:var(--green)">burpsuite &</span></div>
+        <div><span style="color:var(--muted)"># 2. Proxy escucha en 127.0.0.1:8080 por defecto</span></div>
+        <div style="margin-bottom:.4rem"><span style="color:var(--green)">Proxy → Options → 127.0.0.1:8080</span></div>
+        <div><span style="color:var(--muted)"># 3. Configurar Firefox para usar el proxy</span></div>
+        <div style="margin-bottom:.4rem"><span style="color:var(--green)">Ajustes → Red → Proxy manual: 127.0.0.1:8080</span></div>
+        <div><span style="color:var(--muted)"># 4. Instalar certificado CA (para HTTPS)</span></div>
+        <div><span style="color:var(--green)">Navegar a http://burpsuite → Download Certificate</span></div>
+      </div>
+      <h4 style="font-size:.82rem;color:var(--purple);font-family:var(--mono);margin-bottom:.6rem">// Vulnerabilidades que detecta (OWASP Top 10)</h4>
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.9rem 1rem;font-family:var(--mono);font-size:.77rem;line-height:2;margin-bottom:1.25rem;color:var(--muted)">
+        <span style="color:var(--red)">SQL Injection</span> · <span style="color:var(--red)">XSS</span> · <span style="color:var(--red)">CSRF</span> · <span style="color:var(--orange)">IDOR</span> · <span style="color:var(--orange)">Broken Authentication</span> · <span style="color:var(--orange)">Sensitive Data Exposure</span> · <span style="color:var(--accent2)">Security Misconfiguration</span>
+      </div>
+      <div style="background:rgba(188,140,255,.08);border:1px solid rgba(188,140,255,.2);border-left:3px solid var(--purple);border-radius:8px;padding:.9rem 1rem;font-size:.83rem;color:var(--muted)">
+        <strong style="color:var(--purple)">⚠ Uso ético:</strong> Burp Suite solo debe usarse en aplicaciones web propias o en entornos de prueba (DVWA, bWAPP, HackTheBox). Interceptar tráfico ajeno sin autorización viola la Ley 1273 de 2009.
+      </div>
+    `
+  },
+
+  /* ══════════════════════════════════════════════════
+     OPENVAS / GVM
+  ══════════════════════════════════════════════════ */
+  openvas: {
+    title: 'OpenVAS / GVM — Gestión de Vulnerabilidades',
+    body: `
+      <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1.25rem">
+        <div style="width:44px;height:44px;border-radius:12px;background:rgba(210,153,34,.12);color:var(--orange);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0"><i class="fa-solid fa-shield-virus"></i></div>
+        <div>
+          <div style="font-size:.7rem;font-family:var(--mono);color:var(--orange);margin-bottom:.2rem">EVALUACIÓN DE VULNERABILIDADES · CÓDIGO ABIERTO</div>
+          <div style="font-size:.82rem;color:var(--muted)">Greenbone Networks · GPL · greenbone.net</div>
+        </div>
+      </div>
+      <h4 style="font-size:.82rem;color:var(--orange);font-family:var(--mono);margin-bottom:.6rem">// ¿Qué es?</h4>
+      <p style="color:var(--muted);font-size:.87rem;line-height:1.85;margin-bottom:1.25rem"><strong style="color:var(--text)">OpenVAS</strong> (Open Vulnerability Assessment Scanner), parte del framework <strong style="color:var(--text)">GVM</strong> (Greenbone Vulnerability Management), es el sistema de evaluación de vulnerabilidades de código abierto más completo. Tiene una base de datos de más de <strong style="color:var(--text)">80,000 pruebas de vulnerabilidad</strong> (NVTs) actualizada diariamente.</p>
+      <h4 style="font-size:.82rem;color:var(--orange);font-family:var(--mono);margin-bottom:.6rem">// ¿Qué lo diferencia de Nmap?</h4>
+      <p style="color:var(--muted);font-size:.87rem;line-height:1.85;margin-bottom:1.25rem">Nmap <em>mapea</em> la red (qué hay). OpenVAS <em>verifica activamente</em> si cada servicio encontrado tiene vulnerabilidades explotables, comparando contra su base de CVEs. Genera un reporte completo con severidad <strong style="color:var(--red)">Crítica</strong>, <strong style="color:var(--orange)">Alta</strong>, <strong style="color:#d29922">Media</strong> y <strong style="color:var(--accent2)">Baja</strong> según el estándar CVSS.</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:1.25rem">
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem"><div style="color:var(--orange);font-weight:600;margin-bottom:.3rem">✦ +80,000 NVTs</div><div style="color:var(--muted)">Base de datos de pruebas actualizada diariamente por Greenbone.</div></div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem"><div style="color:var(--orange);font-weight:600;margin-bottom:.3rem">✦ CVSS Score</div><div style="color:var(--muted)">Clasifica cada vulnerabilidad con puntuación 0-10 de severidad.</div></div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem"><div style="color:var(--orange);font-weight:600;margin-bottom:.3rem">✦ Reportes PDF/HTML</div><div style="color:var(--muted)">Genera reportes profesionales listos para entregar al cliente.</div></div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem"><div style="color:var(--orange);font-weight:600;margin-bottom:.3rem">✦ Interfaz web</div><div style="color:var(--muted)">Panel web para gestionar escaneos, targets y reportes.</div></div>
+      </div>
+      <h4 style="font-size:.82rem;color:var(--orange);font-family:var(--mono);margin-bottom:.6rem">// Comandos esenciales</h4>
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:1rem 1.25rem;font-family:var(--mono);font-size:.77rem;line-height:2.1;margin-bottom:1.25rem">
+        <div><span style="color:var(--muted)"># Iniciar todos los servicios GVM</span></div>
+        <div style="margin-bottom:.4rem"><span style="color:var(--green)">sudo gvm-start</span></div>
+        <div><span style="color:var(--muted)"># Verificar que todo esté instalado correctamente</span></div>
+        <div style="margin-bottom:.4rem"><span style="color:var(--green)">sudo gvm-check-setup</span></div>
+        <div><span style="color:var(--muted)"># Actualizar la base de datos de vulnerabilidades</span></div>
+        <div style="margin-bottom:.4rem"><span style="color:var(--green)">sudo greenbone-nvt-sync</span></div>
+        <div><span style="color:var(--muted)"># Acceder a la interfaz web</span></div>
+        <div><span style="color:var(--green)">https://127.0.0.1:9392   # usuario: admin</span></div>
+      </div>
+      <div style="background:rgba(210,153,34,.08);border:1px solid rgba(210,153,34,.2);border-left:3px solid var(--orange);border-radius:8px;padding:.9rem 1rem;font-size:.83rem;color:var(--muted)">
+        <strong style="color:var(--orange)">ℹ Escala de severidad CVSS:</strong> 9.0-10.0 = <span style="color:var(--red)">Crítico</span> · 7.0-8.9 = <span style="color:var(--orange)">Alto</span> · 4.0-6.9 = <span style="color:#d29922">Medio</span> · 0.1-3.9 = <span style="color:var(--accent2)">Bajo</span>. Esta escala internacional permite priorizar qué vulnerabilidades corregir primero.
+      </div>
+    `
+  },
+
+  /* ══════════════════════════════════════════════════
+     SQLMAP
+  ══════════════════════════════════════════════════ */
+  sqlmap: {
+    title: 'Sqlmap — Inyección SQL Automatizada',
+    body: `
+      <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1.25rem">
+        <div style="width:44px;height:44px;border-radius:12px;background:rgba(248,81,73,.12);color:var(--red);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0"><i class="fa-solid fa-database"></i></div>
+        <div>
+          <div style="font-size:.7rem;font-family:var(--mono);color:var(--red);margin-bottom:.2rem">SEGURIDAD WEB · EXPLOTACIÓN · KALI LINUX</div>
+          <div style="font-size:.82rem;color:var(--muted)">Bernardo Damele · GPL-2.0 · sqlmap.org</div>
+        </div>
+      </div>
+      <h4 style="font-size:.82rem;color:var(--red);font-family:var(--mono);margin-bottom:.6rem">// ¿Qué es?</h4>
+      <p style="color:var(--muted);font-size:.87rem;line-height:1.85;margin-bottom:1.25rem"><strong style="color:var(--text)">Sqlmap</strong> automatiza completamente la detección y explotación de vulnerabilidades de inyección SQL en aplicaciones web. Soporta MySQL, PostgreSQL, Oracle, MSSQL, SQLite y más de 30 sistemas de bases de datos distintos. La inyección SQL es la vulnerabilidad A03 del OWASP Top 10.</p>
+      <h4 style="font-size:.82rem;color:var(--red);font-family:var(--mono);margin-bottom:.6rem">// Tipos de inyección que detecta</h4>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:1.25rem">
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem"><div style="color:var(--red);font-weight:600;margin-bottom:.3rem">✦ In-band (UNION)</div><div style="color:var(--muted)">Extrae datos directamente en la respuesta HTTP visible.</div></div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem"><div style="color:var(--red);font-weight:600;margin-bottom:.3rem">✦ Blind booleana</div><div style="color:var(--muted)">Infiere datos por respuestas true/false sin ver el resultado.</div></div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem"><div style="color:var(--red);font-weight:600;margin-bottom:.3rem">✦ Time-based</div><div style="color:var(--muted)">Usa retardos con SLEEP() para extraer datos bit a bit.</div></div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem"><div style="color:var(--red);font-weight:600;margin-bottom:.3rem">✦ Error-based</div><div style="color:var(--muted)">Aprovecha mensajes de error del motor de BD para extraer datos.</div></div>
+      </div>
+      <h4 style="font-size:.82rem;color:var(--red);font-family:var(--mono);margin-bottom:.6rem">// Comandos esenciales</h4>
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:1rem 1.25rem;font-family:var(--mono);font-size:.77rem;line-height:2.1;margin-bottom:1.25rem">
+        <div><span style="color:var(--muted)"># Detectar inyección en parámetro GET</span></div>
+        <div style="margin-bottom:.4rem"><span style="color:var(--green)">sqlmap -u "http://target.com/page?id=1"</span></div>
+        <div><span style="color:var(--muted)"># Listar todas las bases de datos</span></div>
+        <div style="margin-bottom:.4rem"><span style="color:var(--green)">sqlmap -u "http://target.com/page?id=1" --dbs</span></div>
+        <div><span style="color:var(--muted)"># Listar tablas de una base de datos</span></div>
+        <div style="margin-bottom:.4rem"><span style="color:var(--green)">sqlmap -u "http://target.com/page?id=1" -D nombre_bd --tables</span></div>
+        <div><span style="color:var(--muted)"># Extraer datos de una tabla</span></div>
+        <div style="margin-bottom:.4rem"><span style="color:var(--green)">sqlmap -u "http://target.com/page?id=1" -D bd -T users --dump</span></div>
+        <div><span style="color:var(--muted)"># Con petición POST (formulario de login)</span></div>
+        <div><span style="color:var(--green)">sqlmap -u "http://target.com/login" --data="user=admin&pass=test"</span></div>
+      </div>
+      <div style="background:rgba(248,81,73,.08);border:1px solid rgba(248,81,73,.2);border-left:3px solid var(--red);border-radius:8px;padding:.9rem 1rem;font-size:.83rem;color:var(--muted)">
+        <strong style="color:var(--red)">⚠ Uso ético:</strong> Sqlmap solo debe usarse en aplicaciones propias o entornos de prueba como DVWA o bWAPP. Usarlo en sistemas reales sin autorización expone datos de terceros y es ilegal bajo la Ley 1273 de 2009.
+      </div>
+    `
+  },
+
+  /* ══════════════════════════════════════════════════
+     AIRCRACK-NG
+  ══════════════════════════════════════════════════ */
+  aircrack: {
+    title: 'Aircrack-ng — Auditoría de Redes Wi-Fi',
+    body: `
+      <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1.25rem">
+        <div style="width:44px;height:44px;border-radius:12px;background:rgba(57,211,83,.12);color:var(--teal);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0"><i class="fa-solid fa-wifi"></i></div>
+        <div>
+          <div style="font-size:.7rem;font-family:var(--mono);color:var(--teal);margin-bottom:.2rem">WI-FI · AUDITORÍA INALÁMBRICA · KALI LINUX</div>
+          <div style="font-size:.82rem;color:var(--muted)">Thomas d'Otreppe · GPL · aircrack-ng.org</div>
+        </div>
+      </div>
+      <h4 style="font-size:.82rem;color:var(--teal);font-family:var(--mono);margin-bottom:.6rem">// ¿Qué es?</h4>
+      <p style="color:var(--muted);font-size:.87rem;line-height:1.85;margin-bottom:1.25rem"><strong style="color:var(--text)">Aircrack-ng</strong> es una suite completa de herramientas para auditoría de redes inalámbricas 802.11 (Wi-Fi). Su función principal es capturar el <strong style="color:var(--text)">handshake WPA/WPA2</strong> que ocurre cuando un dispositivo se conecta a la red, y evaluar la robustez de la contraseña analizando ese handshake contra un diccionario.</p>
+      <h4 style="font-size:.82rem;color:var(--teal);font-family:var(--mono);margin-bottom:.6rem">// Herramientas de la suite</h4>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:1.25rem">
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem"><div style="color:var(--teal);font-weight:600;margin-bottom:.3rem">✦ airmon-ng</div><div style="color:var(--muted)">Activa modo monitor en la tarjeta Wi-Fi para capturar todo el tráfico.</div></div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem"><div style="color:var(--teal);font-weight:600;margin-bottom:.3rem">✦ airodump-ng</div><div style="color:var(--muted)">Captura paquetes de redes cercanas y registra el handshake WPA.</div></div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem"><div style="color:var(--teal);font-weight:600;margin-bottom:.3rem">✦ aireplay-ng</div><div style="color:var(--muted)">Envía paquetes de deautenticación para forzar un nuevo handshake.</div></div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem"><div style="color:var(--teal);font-weight:600;margin-bottom:.3rem">✦ aircrack-ng</div><div style="color:var(--muted)">Analiza el handshake capturado contra un diccionario de contraseñas.</div></div>
+      </div>
+      <h4 style="font-size:.82rem;color:var(--teal);font-family:var(--mono);margin-bottom:.6rem">// Flujo completo de auditoría WPA</h4>
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:1rem 1.25rem;font-family:var(--mono);font-size:.77rem;line-height:2.1;margin-bottom:1.25rem">
+        <div><span style="color:var(--muted)"># 1. Activar modo monitor en la tarjeta Wi-Fi</span></div>
+        <div style="margin-bottom:.4rem"><span style="color:var(--green)">sudo airmon-ng start wlan0</span></div>
+        <div><span style="color:var(--muted)"># 2. Descubrir redes y elegir objetivo (ver BSSID y canal)</span></div>
+        <div style="margin-bottom:.4rem"><span style="color:var(--green)">sudo airodump-ng wlan0mon</span></div>
+        <div><span style="color:var(--muted)"># 3. Capturar handshake de la red objetivo (-c = canal)</span></div>
+        <div style="margin-bottom:.4rem"><span style="color:var(--green)">sudo airodump-ng -c 6 --bssid AA:BB:CC:DD:EE:FF -w captura wlan0mon</span></div>
+        <div><span style="color:var(--muted)"># 4. (Opcional) Forzar desconexión para capturar handshake</span></div>
+        <div style="margin-bottom:.4rem"><span style="color:var(--green)">sudo aireplay-ng --deauth 5 -a AA:BB:CC:DD:EE:FF wlan0mon</span></div>
+        <div><span style="color:var(--muted)"># 5. Analizar handshake con diccionario</span></div>
+        <div><span style="color:var(--green)">aircrack-ng captura.cap -w /usr/share/wordlists/rockyou.txt</span></div>
+      </div>
+      <div style="background:rgba(57,211,83,.08);border:1px solid rgba(57,211,83,.2);border-left:3px solid var(--teal);border-radius:8px;padding:.9rem 1rem;font-size:.83rem;color:var(--muted)">
+        <strong style="color:var(--teal)">ℹ Mitigación:</strong> Usar contraseñas Wi-Fi de mínimo 20 caracteres aleatorios hace el ataque de diccionario inviable. WPA3 elimina este vector completamente usando SAE en lugar del handshake de 4 vías.
+      </div>
+    `
+  },
+
+  /* ══════════════════════════════════════════════════
+     NETCAT
+  ══════════════════════════════════════════════════ */
+  netcat: {
+    title: 'Netcat — La Navaja Suiza de las Redes',
+    body: `
+      <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1.25rem">
+        <div style="width:44px;height:44px;border-radius:12px;background:rgba(56,139,253,.12);color:#58a6ff;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0"><i class="fa-solid fa-plug"></i></div>
+        <div>
+          <div style="font-size:.7rem;font-family:var(--mono);color:#58a6ff;margin-bottom:.2rem">REDES · DIAGNÓSTICO · KALI LINUX</div>
+          <div style="font-size:.82rem;color:var(--muted)">Hobbit · Dominio Público · kali.org/tools/netcat</div>
+        </div>
+      </div>
+      <h4 style="font-size:.82rem;color:var(--accent2);font-family:var(--mono);margin-bottom:.6rem">// ¿Qué es?</h4>
+      <p style="color:var(--muted);font-size:.87rem;line-height:1.85;margin-bottom:1.25rem"><strong style="color:var(--text)">Netcat</strong> (nc) es la herramienta de redes más versátil de Kali Linux. Lee y escribe datos a través de conexiones TCP y UDP, puede actuar como servidor o cliente, transferir archivos, crear shells remotas y diagnosticar conectividad — todo desde la línea de comandos con un solo comando simple.</p>
+      <h4 style="font-size:.82rem;color:var(--accent2);font-family:var(--mono);margin-bottom:.6rem">// Casos de uso principales</h4>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:1.25rem">
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem"><div style="color:#58a6ff;font-weight:600;margin-bottom:.3rem">✦ Diagnóstico de puertos</div><div style="color:var(--muted)">Verificar si un puerto específico está abierto y accesible.</div></div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem"><div style="color:#58a6ff;font-weight:600;margin-bottom:.3rem">✦ Transferir archivos</div><div style="color:var(--muted)">Enviar archivos entre dos máquinas por la red sin SCP ni FTP.</div></div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem"><div style="color:#58a6ff;font-weight:600;margin-bottom:.3rem">✦ Shell reversa</div><div style="color:var(--muted)">Recibir una terminal remota tras explotar una vulnerabilidad.</div></div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.8rem"><div style="color:#58a6ff;font-weight:600;margin-bottom:.3rem">✦ Servidor de prueba</div><div style="color:var(--muted)">Levantar un servidor TCP/UDP rápido para depurar aplicaciones.</div></div>
+      </div>
+      <h4 style="font-size:.82rem;color:var(--accent2);font-family:var(--mono);margin-bottom:.6rem">// Comandos esenciales</h4>
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:1rem 1.25rem;font-family:var(--mono);font-size:.77rem;line-height:2.1;margin-bottom:1.25rem">
+        <div><span style="color:var(--muted)"># Verificar si un puerto está abierto</span></div>
+        <div style="margin-bottom:.4rem"><span style="color:var(--green)">nc -zv 192.168.1.1 22</span></div>
+        <div><span style="color:var(--muted)"># Escuchar en un puerto (modo servidor)</span></div>
+        <div style="margin-bottom:.4rem"><span style="color:var(--green)">nc -lvnp 4444</span></div>
+        <div><span style="color:var(--muted)"># Conectar a un host (modo cliente)</span></div>
+        <div style="margin-bottom:.4rem"><span style="color:var(--green)">nc 192.168.1.50 4444</span></div>
+        <div><span style="color:var(--muted)"># Transferir archivo — receptor</span></div>
+        <div style="margin-bottom:.4rem"><span style="color:var(--green)">nc -lvnp 9999 > archivo_recibido.zip</span></div>
+        <div><span style="color:var(--muted)"># Transferir archivo — emisor</span></div>
+        <div style="margin-bottom:.4rem"><span style="color:var(--green)">nc 192.168.1.50 9999 < archivo.zip</span></div>
+        <div><span style="color:var(--muted)"># Escanear rango de puertos</span></div>
+        <div><span style="color:var(--green)">nc -zv 192.168.1.1 20-100</span></div>
+      </div>
+      <div style="background:rgba(56,139,253,.08);border:1px solid rgba(56,139,253,.2);border-left:3px solid #58a6ff;border-radius:8px;padding:.9rem 1rem;font-size:.83rem;color:var(--muted)">
+        <strong style="color:#58a6ff">ℹ Usos legítimos frecuentes:</strong> Diagnóstico de conectividad entre servicios, prueba de reglas de firewall, transferencia rápida de archivos en la red local y depuración de aplicaciones de red durante el desarrollo.
       </div>
     `
   }
